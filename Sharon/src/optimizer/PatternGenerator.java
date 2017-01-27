@@ -18,10 +18,10 @@ public class PatternGenerator {
 		 }	
 				
 		 System.out.println(	"Number of patterns: " + number_of_patterns +
-			   "\nMin length: " + min_length +
-			   "\nMax length: " + max_length +
-			   "\nNumber of event types: " + number_of_event_types +
-				"\n----------------------------------");	    
-		}
+				 "\nMin length: " + min_length +
+			   	 "\nMax length: " + max_length +
+			   	 "\nNumber of event types: " + number_of_event_types +
+				 "\n----------------------------------");	    
+	 	 }	
 
 }
