@@ -40,9 +40,15 @@ public class SharingPlanSelection {
 		Set<String> exh_sol = exhaustive(G);
 		long endexh = System.currentTimeMillis();
 		
+		// SHARON
+		long startsharon = System.currentTimeMillis();
+		Set<String> exh_sharon = BnB(G);
+		long endsharon = System.currentTimeMillis();
+		
+		Graph H = construct(new HashSet<Pattern>(Arrays.asList(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)));
 		// GWMIN
 		long startgwmin = System.currentTimeMillis();		
-		Set<String> gwmin_sol = gwmin(G);		
+		Set<String> gwmin_sol = gwmin(H);		
 		long endgwmin = System.currentTimeMillis();
 		
 		// Print out results
@@ -61,6 +67,14 @@ public class SharingPlanSelection {
 		
 		long durationexh = endexh - startexh;
 		System.out.println("Time: " + durationexh + "\n");
+		
+		System.out.println("SHARON:");
+		for (String s : exh_sharon) {
+			System.out.println(s);
+		}
+		
+		long durationsharon = endsharon - startsharon;
+		System.out.println("Time: " + durationsharon + "\n");
 	}
 
 	public static Graph construct(Set<Pattern> F) {
@@ -79,10 +93,6 @@ public class SharingPlanSelection {
 			}
 		}
 		
-		return G;
-	}
-	
-	public static Graph reduce(Graph G) {
 		return G;
 	}
 	
@@ -137,43 +147,76 @@ public class SharingPlanSelection {
 		return true;
 	}
 	
-	public static LinkedList<LinkedList<String>> getNextLevel(Graph G, LinkedList<LinkedList<String>> Parents, boolean exh) {
+	// Because they are so similar, I combined exhaustive and Sharon algorithms together, but separating them might save a little time.
+	public static LinkedList<LinkedList<String>> getNextLevel(Graph G, LinkedList<LinkedList<String>> Parents, boolean sharon) {
 		LinkedList<LinkedList<String>> Children = new LinkedList<LinkedList<String>>();
 		LinkedList<String> Pi, Pj, u;
-		if (exh) {
-			for (int i=0; i<Parents.size(); i++) {
-				Pi = Parents.get(i);
-				for (int j=i+1; j<Parents.size(); j++) {
-					Pj = Parents.get(j);
-					
-					boolean generateChild = true;
-					
-					if (Pj.size()>1) {
-						for (int k = 0; k<Pj.size()-1; k++) {
-							if (Pi.get(k)!=Pj.get(k)) {
-								generateChild = false;
-								break;
-							}
+		for (int i=0; i<Parents.size(); i++) {
+			Pi = Parents.get(i);
+			for (int j=i+1; j<Parents.size(); j++) {
+				Pj = Parents.get(j);
+				
+				boolean generateChild = true;
+				
+				if (Pj.size()>1) {
+					for (int k = 0; k<Pj.size()-1; k++) {
+						if (Pi.get(k)!=Pj.get(k)) {
+							generateChild = false;
+							break;
 						}
 					}
-					
-					if (generateChild) {
-						u = new LinkedList<String>();
-						for (int n=0; n<Pi.size(); n++) {
-							u.add(Pi.get(n));
-						}
-						u.add(Pj.get(Pj.size()-1));
-						//System.err.println("added " + u);
-						Children.add(u);
+				}
+				
+				if (generateChild && sharon && G.hasEdge(Pi.get(Pi.size()-1), Pj.get(Pj.size()-1))) {
+					generateChild = false;
+				}
+				
+				if (generateChild) {
+					u = new LinkedList<String>();
+					for (int n=0; n<Pi.size(); n++) {
+						u.add(Pi.get(n));
 					}
+					u.add(Pj.get(Pj.size()-1));
+					//System.err.println("added " + u);
+					Children.add(u);
 				}
 			}
 		}
 		return Children;
 	}
 	
+	// sharon reduces the graph, so if you want to save the graph, make a copy of it.
 	public static Set<String> BnB(Graph G) {
 		Set<String> opt = new HashSet<String>();
+		Set<String> S = new HashSet<String>();
+		int max = 0;
+		LinkedList<LinkedList<String>> Level = new LinkedList<LinkedList<String>>();
+		
+		for (String vname : G.getVnames()) {
+			if (G.getVertex(vname).getDegree()==0) {
+				S.add(vname);
+			}
+		}
+		
+		for (String vname : S) {
+			G.removeVertex(vname);
+		}
+		
+		for (String vname : G.getVnames()) {
+			Level.add(new LinkedList<String>(Arrays.asList(vname)));
+		}
+		
+		while (Level.size() > 0) {
+			for (LinkedList<String> P : Level) {
+				if (score(G, P) > max) {
+					opt.clear();
+					opt.addAll(P);
+					max = score(G, P);
+				}
+			}
+			Level = getNextLevel(G, Level, true);
+		}
+		opt.addAll(S);
 		return opt;
 	}
 	
@@ -184,15 +227,9 @@ public class SharingPlanSelection {
 		
 		for (String vname : G.getVnames()) {
 			Level.add(new LinkedList<String>(Arrays.asList(vname)));
-			if (G.getVertex(vname).getWeight() > max) {
-				opt.clear();
-				opt.add(vname);
-				max = G.getVertex(vname).getWeight();
-			}
 		}
 		
-		for (int i = 2; i <= G.numVertices(); i++) {
-			Level = getNextLevel(G, Level, true);
+		for (int i = 1; i <= G.numVertices(); i++) {
 			for (LinkedList<String> P : Level) {
 				if (isValid(G, P) && score(G, P) > max) {
 					opt.clear();
@@ -200,6 +237,7 @@ public class SharingPlanSelection {
 					max = score(G, P);
 				}
 			}
+			Level = getNextLevel(G, Level, false);
 		}
 		return opt;
 	}
