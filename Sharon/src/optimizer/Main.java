@@ -21,16 +21,16 @@ public class Main {
 		 }					
 		 		 
 		 /*** Create k random patterns of length l using t types ***/
-		 System.out.println("*** " + k + " random patterns of length " + l + " composed of " + t + " event types: ***");
-		 ArrayList<String> randomPatterns = PatternGenerator.getRandomPatterns(k,l,t);
+		 System.out.println("\n*** " + k + " random patterns of length " + l + " composed of " + t + " event types: ***");
+		 ArrayList<Pattern> randomPatterns = PatternGenerator.getRandomPatterns(k,l,t);
 		 
 		 /*** Get frequent patterns from random patterns ***/
-		 System.out.println("*** Frequent patterns: ***");
-		 HashMap<String,ArrayList<Integer>> frequentPatterns = CCSpan.getFrequentPatterns(randomPatterns);
+		 System.out.println("\n*** Frequent patterns: ***");
+		 HashMap<String,Pattern> frequentPatterns = CCSpan.getFrequentPatterns(randomPatterns);
 		 
 		 /*** Get shared patterns from frequent patterns ***/
-		 System.out.println("*** Shared patterns created by " + algo + " algorithm: ***");
-		 HashMap<String,ArrayList<Integer>> sharedPatterns = new HashMap<String,ArrayList<Integer>>();
+		 System.out.println("\n*** Shared patterns created by " + algo + " algorithm: ***");
+		 ArrayList<Pattern> sharedPatterns = new ArrayList<Pattern>();
 		 long start =  System.currentTimeMillis();
 		 /*switch (algo) {
 		 case 0: sharedPatterns = ExhautiveSearch(frequentPatterns);
