@@ -12,15 +12,15 @@ public class SharingPlanSelection {
 		Pattern p5 = new Pattern("DFA", 4, new HashSet<String>(Arrays.asList("q2", "q4", "q5")));
 		Pattern p6 = new Pattern("XY", 5, new HashSet<String>(Arrays.asList("q1", "q7")));
 		
-		Pattern p7 = new Pattern("GH", 8, new HashSet<String>(Arrays.asList("q1", "q2", "q3", "q4")));
-		Pattern p8 = new Pattern("GHI", 7, new HashSet<String>(Arrays.asList("q1", "q2")));
-		Pattern p9 = new Pattern("JDG", 2, new HashSet<String>(Arrays.asList("q3", "q4")));
-		Pattern p10 = new Pattern("JDGH", 4, new HashSet<String>(Arrays.asList("q3", "q4")));
+		Pattern p7 = new Pattern("FH", 8, new HashSet<String>(Arrays.asList("q1", "q2", "q3", "q4")));
+		Pattern p8 = new Pattern("FHI", 7, new HashSet<String>(Arrays.asList("q1", "q2")));
+		Pattern p9 = new Pattern("JKG", 1, new HashSet<String>(Arrays.asList("q3", "q4")));
+		Pattern p10 = new Pattern("JKGH", 3, new HashSet<String>(Arrays.asList("q3", "q4")));
 		
-		Pattern p11 = new Pattern("KP", 4, new HashSet<String>(Arrays.asList("q4", "q5", "q6", "q1")));
-		Pattern p12 = new Pattern("KPO", 1, new HashSet<String>(Arrays.asList("q4", "q5")));
-		Pattern p13 = new Pattern("LNC", 1, new HashSet<String>(Arrays.asList("q2", "q7")));
-		Pattern p14 = new Pattern("GNKF", 1, new HashSet<String>(Arrays.asList("q6", "q2")));
+		Pattern p11 = new Pattern("QP", 4, new HashSet<String>(Arrays.asList("q4", "q5", "q1")));
+		Pattern p12 = new Pattern("MPO", 3, new HashSet<String>(Arrays.asList("q3", "q5")));
+		Pattern p13 = new Pattern("LNR", 1, new HashSet<String>(Arrays.asList("q2", "q6", "q7")));
+		Pattern p14 = new Pattern("QLNR", 2, new HashSet<String>(Arrays.asList("q6", "q2")));
 
 		Graph G = construct(new HashSet<Pattern>(Arrays.asList(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)));
 		
@@ -42,7 +42,7 @@ public class SharingPlanSelection {
 		
 		// SHARON
 		long startsharon = System.currentTimeMillis();
-		Set<String> exh_sharon = BnB(G);
+		Set<String> exh_sharon = sharon(G);
 		long endsharon = System.currentTimeMillis();
 		
 		Graph H = construct(new HashSet<Pattern>(Arrays.asList(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14)));
@@ -83,7 +83,6 @@ public class SharingPlanSelection {
 		for (Pattern p : F) {
 			if (p.getBValue()>0) {
 				G.addVertex(p.toString(), p.getBValue());
-				//System.err.println(p);
 				for (Pattern p_prime : added) {
 					if(p.conflictsWith(p_prime)) {
 						G.addEdge(p.toString(), p_prime.toString());
@@ -99,8 +98,8 @@ public class SharingPlanSelection {
 	// gwmin destroys the graph, so if you want to save the graph, make a copy of it.
 	public static Set<String> gwmin(Graph G) {
 		Set<String> I = new HashSet<String>();
-		int max;
-		int max_temp;
+		double max;
+		double max_temp;
 		Vertex v_temp;
 		String v_i;
 		Graph G_i = G;
@@ -112,12 +111,13 @@ public class SharingPlanSelection {
 			V = G_i.getVnames();
 			for (String v_id : V) {
 				v_temp = G_i.getVertex(v_id);
-				max_temp = v_temp.getWeight() / (v_temp.getDegree() + 1);
+				max_temp = (double) v_temp.getWeight() / (v_temp.getDegree() + 1);
 				if (max_temp > max) {
 					max = max_temp;
 					v_i = v_id;
 				}
 			}
+			//System.err.println(v_i + " BValue " + max);
 			I.add(v_i);
 			N = G.getNbrs(v_i);
 			for (String nbr_id : N) {
@@ -145,6 +145,16 @@ public class SharingPlanSelection {
 			}
 		}
 		return true;
+	}
+	
+	public static int pscore(Graph G, String v) {
+		int p = G.getVertex(v).getWeight();
+		for (String w : G.getVnames()) {
+			if (!G.hasEdge(v, w)) {
+				p += G.getVertex(w).getWeight();
+			}
+		}
+		return p;
 	}
 	
 	// Because they are so similar, I combined exhaustive and Sharon algorithms together, but separating them might save a little time.
@@ -186,22 +196,56 @@ public class SharingPlanSelection {
 	}
 	
 	// sharon reduces the graph, so if you want to save the graph, make a copy of it.
-	public static Set<String> BnB(Graph G) {
+	public static Set<String> sharon(Graph G) {
 		Set<String> opt = new HashSet<String>();
 		Set<String> S = new HashSet<String>();
+		Set<String> R, T;
 		int max = 0;
+		double min;
+		boolean reduce;
+		Vertex v_temp;
 		LinkedList<LinkedList<String>> Level = new LinkedList<LinkedList<String>>();
 		
-		for (String vname : G.getVnames()) {
-			if (G.getVertex(vname).getDegree()==0) {
-				S.add(vname);
+		// Graph reduction
+		reduce = true;
+		
+		while (reduce) {
+			R = new HashSet<String>();
+			T = new HashSet<String>();
+			min = 0;
+			for (String v_id : G.getVnames()) {
+				v_temp = G.getVertex(v_id);
+				min += (double) v_temp.getWeight() / (v_temp.getDegree() + 1);
+			}
+			
+			//System.err.println(min);
+			
+			for (String vname : G.getVnames()) {
+				if (G.getVertex(vname).getDegree()==0) {
+					R.add(vname);
+				} else if (pscore(G,vname) < min) {
+					T.add(vname);
+				}
+			}
+			
+			for (String vname : R) {
+				G.removeVertex(vname);
+				//System.err.println("reduction removed and saved " + vname);
+			}
+			
+			for (String vname : T) {
+				G.removeVertex(vname);
+				//System.err.println("reduction removed " + vname);
+			}
+			
+			if (R.size()==0 && T.size()==0) {
+				reduce = false;
+			} else {
+				S.addAll(R);
 			}
 		}
 		
-		for (String vname : S) {
-			G.removeVertex(vname);
-		}
-		
+		// Start BnB
 		for (String vname : G.getVnames()) {
 			Level.add(new LinkedList<String>(Arrays.asList(vname)));
 		}
