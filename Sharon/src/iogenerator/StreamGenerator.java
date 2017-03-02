@@ -13,7 +13,7 @@ public class StreamGenerator {
 	public static void getStream(HashMap<String,Integer> rates) {
 		
 		try {			 
-			String output_file_name = "./" + "output.txt"; 
+			String output_file_name = "./stream.txt"; 
 			File output_file = new File(output_file_name);
 			BufferedWriter output = new BufferedWriter(new FileWriter(output_file));			
 			
@@ -23,14 +23,14 @@ public class StreamGenerator {
 			for (String type : types) {
 				int rate = rates.get(type);
 				for (int i=0; i<rate; i++) {
-					string += type;
+					string += type + " ";
 				}
 			}
 			//System.out.println("String " + string);	
 			
 			// Store the string to file
 			for (int i=0; i<100; i++) {
-				 output.append(string + "\n"); 
+				 output.append(string); 
 			}			
 			
 			 output.close();

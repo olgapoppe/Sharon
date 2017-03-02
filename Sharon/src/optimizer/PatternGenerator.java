@@ -1,5 +1,9 @@
 package optimizer;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -9,20 +13,29 @@ public class PatternGenerator {
 	public static ArrayList<Pattern> getPatterns(int k, int l, int t, int n, int m) {
 		 
 		 ArrayList<Pattern> long_patterns = new ArrayList<Pattern>();		 
-		 ArrayList<Pattern> short_patterns = getRandomPatterns(k,l,t);
-		 
+		 ArrayList<Pattern> short_patterns = getRandomPatterns(k,l,t);		 
 		 Random random = new Random();
-		 for (int i=0; i<n; i++) {
-			 String long_pattern = "";
-			 for (int j=0; j<m; j++) {
-				int random_index = random.nextInt(k);
-				Pattern short_pattern = short_patterns.get(random_index);
-				long_pattern += short_pattern.pattern;
-			 }
-			 Pattern pattern = new Pattern(long_pattern);
-			 long_patterns.add(pattern);
-			 System.out.println(pattern.toString());
-		}
+		 
+		 try {			 
+			String output_file_name = "./queries.txt"; 
+			File output_file = new File(output_file_name);
+			BufferedWriter output = new BufferedWriter(new FileWriter(output_file));
+			
+			for (int i=0; i<n; i++) {
+				String long_pattern = "";
+				for (int j=0; j<m; j++) {
+					int random_index = random.nextInt(k);
+					Pattern short_pattern = short_patterns.get(random_index);
+					long_pattern += short_pattern.pattern;
+			 	}
+			 	Pattern pattern = new Pattern(long_pattern);
+			 	long_patterns.add(pattern);
+			 	System.out.println(pattern.toString());
+			 	
+			 	output.append(long_pattern + "\n");
+			}
+			output.close();	
+		} catch (IOException e) { e.printStackTrace(); }
 		return long_patterns;
 	 }
 	
