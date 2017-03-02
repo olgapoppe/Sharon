@@ -3,6 +3,7 @@ package optimizer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import iogenerator.*;
 
 // Example input parameters: -n 10 -m 5 -k 3 -l 5 -t 5
 
@@ -27,14 +28,20 @@ public class Main {
 			if (args[i].equals("-algo")) 	algo = Integer.parseInt(args[++i]);
 		 }	
 		 
+		 /*** Generate random rates for t event types ***/
 		 HashMap<String,Integer> rates = new HashMap<String,Integer>();
 		 Random random = new Random();
+		 System.out.println("\n*** Event rate per event type: ***");
 		 for (int i=1; i<=t; i++) {
 			 int rate = random.nextInt(t) + 1; 
 			 rates.put(i+"", rate);
-		 }		 
+			 System.out.println("Event type " + i + " has rate " + rate);
+		 }	
+		 
+		 /*** Generate input event stream for given rates per event type ***/
+		 StreamGenerator.getStream(rates);		 
 		 		 
-		 /*** Create k random patterns of length l using t types ***/
+		 /*** Generate n patterns of length m*l using t event types ***/
 		 System.out.println("\n*** " + n + " patterns of length " + (m*l) + " composed of " + t + " event types: ***");
 		 ArrayList<Pattern> randomPatterns = PatternGenerator.getPatterns(k,l,t,n,m);
 		 

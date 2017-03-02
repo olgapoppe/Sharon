@@ -1,0 +1,39 @@
+package iogenerator;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Set;
+
+public class StreamGenerator {
+	
+	// Generate input event stream for given rates per event type
+	public static void getStream(HashMap<String,Integer> rates) {
+		
+		try {			 
+			String output_file_name = "./" + "output.txt"; 
+			File output_file = new File(output_file_name);
+			BufferedWriter output = new BufferedWriter(new FileWriter(output_file));			
+			
+			// Generate a string
+			String string = "";
+			Set<String> types = rates.keySet();
+			for (String type : types) {
+				int rate = rates.get(type);
+				for (int i=0; i<rate; i++) {
+					string += type;
+				}
+			}
+			//System.out.println("String " + string);	
+			
+			// Store the string to file
+			for (int i=0; i<100; i++) {
+				 output.append(string + "\n"); 
+			}			
+			
+			 output.close();
+		} catch (IOException e) { e.printStackTrace(); }			
+	 }
+}

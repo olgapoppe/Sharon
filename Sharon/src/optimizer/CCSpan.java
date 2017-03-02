@@ -20,7 +20,7 @@ public class CCSpan {
 	     int number_of_beneficial_patterns = 0;
 	     for (String key : keys) {
 	    	 Pattern p = results.get(key);
-	    	 if (!p.isFrequent()) {
+	    	 if (!p.isFrequent() || p.pattern.length()<2) {
 	    		removed.add(p);
 	    	 	//System.out.println("Infrequent pattern " + p.toString());
 	    	 } else {
