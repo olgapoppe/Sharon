@@ -4,19 +4,23 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-// Example input parameters: -k 10 -l 10 -t 5
+// Example input parameters: -n 10 -m 5 -k 3 -l 5 -t 5
 
 public class Main {
 	
 	public static void main(String[] args) {
 		 
 		 /*** Read the input parameters and generate random rates of events per type ***/
-		 int k = 0;
-		 int l = 0;
-		 int t = 0;	  
-		 int algo = 0;
+		 int n = 0; // n is the number of long patterns
+		 int m = 0; // m*l is the length of long patterns
+		 int k = 0; // number of short patterns
+		 int l = 0; // length of short patterns
+		 int t = 0;	 // event types 
+		 int algo = 0; // algorithm: 0 - Exhaustive search, 1 - GWMIN, 2 - B&B
 		 
 		 for (int i=0; i<args.length; i++) {
+			if (args[i].equals("-n"))		n = Integer.parseInt(args[++i]);
+			if (args[i].equals("-m"))		m = Integer.parseInt(args[++i]);
 			if (args[i].equals("-k"))		k = Integer.parseInt(args[++i]);
 			if (args[i].equals("-l"))		l = Integer.parseInt(args[++i]);
 			if (args[i].equals("-t")) 		t = Integer.parseInt(args[++i]);
@@ -31,8 +35,8 @@ public class Main {
 		 }		 
 		 		 
 		 /*** Create k random patterns of length l using t types ***/
-		 System.out.println("\n*** " + k + " random patterns of length " + l + " composed of " + t + " event types: ***");
-		 ArrayList<Pattern> randomPatterns = PatternGenerator.getRandomPatterns(k,l,t);
+		 System.out.println("\n*** " + n + " patterns of length " + (m*l) + " composed of " + t + " event types: ***");
+		 ArrayList<Pattern> randomPatterns = PatternGenerator.getPatterns(k,l,t,n,m);
 		 
 		 /*** Get frequent patterns from random patterns ***/
 		 System.out.println("\n*** Frequent patterns: ***");

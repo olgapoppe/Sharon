@@ -25,11 +25,13 @@ public class CCSpan {
 	    	 	//System.out.println("Infrequent pattern " + p.toString());
 	    	 } else {
 	    		int bvalue =  p.getBValue(rates);
-	    		System.out.println("Frequent pattern " + p.toString() + 
+	    		if (bvalue > 0) {
+	    			System.out.println("Frequent beneficial pattern " + p.toString() + 
 	    				" with BValue " + bvalue +
 	    				" appears in " + p.patterns.size() + " patterns");
+	    			number_of_beneficial_patterns++;
+	    		}
 	    		number_of_patterns++;
-	    		if (bvalue > 0) number_of_beneficial_patterns++;
 	    	 }
 	     }
 	     System.out.println(number_of_beneficial_patterns + " of " + number_of_patterns + " are beneficial.");
