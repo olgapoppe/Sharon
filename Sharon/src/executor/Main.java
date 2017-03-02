@@ -8,6 +8,9 @@ import java.util.Date;
 import java.util.Scanner;
 import event.*;
 
+// -type commerce -stream ../../../commerce/stream.txt -queries ../../../commerce/queries.txt -algo nonshared -epw 80
+// -type traffic -stream ../../../LR/traffic.dat -queries ../../../LR/queries.txt -algo nonshared -epw 1000
+
 public class Main {
 	
 	public static void main (String[] args) { 
@@ -23,7 +26,7 @@ public class Main {
 	    
 	    /*** Input and output ***/
 	    // Set default values
-	    String type = "commerse";
+	    String type = "commerce";
 	    String file_of_queries = "./queries.txt";
 	    String file_of_stream = "./stream.txt";
 		
@@ -49,8 +52,6 @@ public class Main {
 	    /*** Parsing queries and event stream ***/
 	    try {
 	    	ArrayList<String> queries = new ArrayList<String>();
-	    	ArrayList<Event> events = new ArrayList<Event>();
-	    	
 	    	Scanner query_scanner = new Scanner(new File(file_of_queries));
 	    	while (query_scanner.hasNextLine()) {
 				String query = query_scanner.nextLine();
@@ -58,18 +59,14 @@ public class Main {
 	    	}
 	    	query_scanner.close();
 	    
+	    	ArrayList<Event> events = new ArrayList<Event>();
 	    	Scanner stream_scanner = new Scanner(new File(file_of_stream));
-			String events_string = stream_scanner.nextLine();
-			String[] event_strings = events_string.split(" ");
-			int event_number = 0;
-			for (String line : event_strings) {
-				Event e = Event.parse(line,type);
-				if (event_number < events_per_window) {
-					events.add(e);
-					event_number++;
-				} else {
-					break;
-				}
+	    	int event_number = 0;
+	    	while (stream_scanner.hasNextLine() && event_number < events_per_window) {
+	    		String event_string = stream_scanner.nextLine();		
+	    		Event e = Event.parse(event_string,type);
+				events.add(e);
+				event_number++;			
 			}
 			stream_scanner.close();
 		

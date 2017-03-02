@@ -3,9 +3,11 @@ package optimizer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+
 import iogenerator.*;
 
-// Example input parameters: -n 10 -m 5 -k 3 -l 5 -t 5
+// -n 10 -m 5 -k 3 -l 5 -t 5 -stream ../../../commerce/stream.txt -queries ../../../commerce/queries.txt
+//-n 10 -m 5 -k 3 -l 5 -t 4 -queries ../../../commerce/queries.txt
 
 public class Main {
 	
@@ -18,6 +20,8 @@ public class Main {
 		 int l = 0; // length of short patterns
 		 int t = 0;	 // event types 
 		 int algo = 0; // algorithm: 0 - Exhaustive search, 1 - GWMIN, 2 - B&B
+		 String file_of_queries = "";
+		 String file_of_stream = "";
 		 
 		 for (int i=0; i<args.length; i++) {
 			if (args[i].equals("-n"))		n = Integer.parseInt(args[++i]);
@@ -26,24 +30,26 @@ public class Main {
 			if (args[i].equals("-l"))		l = Integer.parseInt(args[++i]);
 			if (args[i].equals("-t")) 		t = Integer.parseInt(args[++i]);
 			if (args[i].equals("-algo")) 	algo = Integer.parseInt(args[++i]);
+			if (args[i].equals("-stream")) 	file_of_stream = args[++i];
+			if (args[i].equals("-queries")) file_of_queries = args[++i];
 		 }	
 		 
 		 /*** Generate random rates for t event types ***/
 		 HashMap<String,Integer> rates = new HashMap<String,Integer>();
 		 Random random = new Random();
 		 System.out.println("\n*** Event rate per event type: ***");
-		 for (int i=1; i<=t; i++) {
+		 for (int i=0; i<t; i++) {
 			 int rate = random.nextInt(t) + 1; 
 			 rates.put(i+"", rate);
 			 System.out.println("Event type " + i + " has rate " + rate);
 		 }	
 		 
 		 /*** Generate input event stream for given rates per event type ***/
-		 StreamGenerator.getStream(rates);		 
+		 if (file_of_stream.length()>0) StreamGenerator.getStream(rates,file_of_stream);		 
 		 		 
 		 /*** Generate n patterns of length m*l using t event types ***/
 		 System.out.println("\n*** " + n + " patterns of length " + (m*l) + " composed of " + t + " event types: ***");
-		 ArrayList<Pattern> randomPatterns = PatternGenerator.getPatterns(k,l,t,n,m);
+		 ArrayList<Pattern> randomPatterns = PatternGenerator.getPatterns(k,l,t,n,m,file_of_queries);
 		 
 		 /*** Get frequent patterns from random patterns ***/
 		 System.out.println("\n*** Frequent patterns: ***");

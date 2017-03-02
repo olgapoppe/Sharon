@@ -10,15 +10,14 @@ import java.util.Random;
 public class PatternGenerator {
 	
 	// Generates n long patterns of length m*l from k random short patterns of length l 
-	public static ArrayList<Pattern> getPatterns(int k, int l, int t, int n, int m) {
+	public static ArrayList<Pattern> getPatterns(int k, int l, int t, int n, int m, String file_of_queries) {
 		 
 		 ArrayList<Pattern> long_patterns = new ArrayList<Pattern>();		 
 		 ArrayList<Pattern> short_patterns = getRandomPatterns(k,l,t);		 
 		 Random random = new Random();
 		 
 		 try {			 
-			String output_file_name = "./queries.txt"; 
-			File output_file = new File(output_file_name);
+			File output_file = new File(file_of_queries);
 			BufferedWriter output = new BufferedWriter(new FileWriter(output_file));
 			
 			for (int i=0; i<n; i++) {
@@ -47,7 +46,7 @@ public class PatternGenerator {
 		 for (int i=0; i<k; i++) {
 			 String p = "";
 			 for (int j=0; j<l; j++) {
-				int event_type = random.nextInt(t) + 1;
+				int event_type = random.nextInt(t);
 				p += event_type;
 			 }
 			 Pattern pattern = new Pattern(p);

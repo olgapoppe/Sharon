@@ -10,11 +10,10 @@ import java.util.Set;
 public class StreamGenerator {
 	
 	// Generate input event stream for given rates per event type
-	public static void getStream(HashMap<String,Integer> rates) {
+	public static void getStream(HashMap<String,Integer> rates, String file_of_stream) {
 		
 		try {			 
-			String output_file_name = "./stream.txt"; 
-			File output_file = new File(output_file_name);
+			File output_file = new File(file_of_stream);
 			BufferedWriter output = new BufferedWriter(new FileWriter(output_file));			
 			
 			// Generate a string
@@ -23,13 +22,13 @@ public class StreamGenerator {
 			for (String type : types) {
 				int rate = rates.get(type);
 				for (int i=0; i<rate; i++) {
-					string += type + " ";
+					string += type + "\n";
 				}
 			}
 			//System.out.println("String " + string);	
 			
 			// Store the string to file
-			for (int i=0; i<10; i++) {
+			for (int i=0; i<100; i++) {
 				 output.append(string); 
 			}			
 			

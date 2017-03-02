@@ -1,24 +1,21 @@
 package executor;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
 import event.*;
 
 public class Aseq {
 	
 	public static void nonshared (ArrayList<String> queries, ArrayList<Event> events) {
 		
-		HashMap<String,ArrayList<Integer>> type_to_lengths = new HashMap<String,ArrayList<Integer>>(); 
-		HashMap<Integer,Integer> length_to_count = new HashMap<Integer,Integer>();
-		
 		long start = System.currentTimeMillis();
 		int memory = 0;
 		
 		// For each query, iterate over its types, map each type to lengths, map length to count
-		for  (String query : queries) {		
+		for  (String query : queries) {	
+			
+			HashMap<String,ArrayList<Integer>> type_to_lengths = new HashMap<String,ArrayList<Integer>>(); 
+			HashMap<Integer,Integer> length_to_count = new HashMap<Integer,Integer>();
 				
 			for (int i=0; i<query.length(); i++) {
 					
@@ -60,8 +57,6 @@ public class Aseq {
 		}
 			
 		long end = System.currentTimeMillis();
-		long duration = end - start;
-		
-		System.out.println("\nLatency: " + duration + "\nMemory: " + memory + "\n");
+		System.out.println("\nLatency: " + (end - start) + "\nMemory: " + memory + "\n");
 	}
 }
