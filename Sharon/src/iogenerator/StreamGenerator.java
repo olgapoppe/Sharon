@@ -29,7 +29,7 @@ public class StreamGenerator {
 			//System.out.println("String " + string);	
 			
 			// Store the string to file
-			for (int i=0; i<100; i++) {
+			for (int i=0; i<10; i++) {
 				 output.append(string); 
 			}			
 			
