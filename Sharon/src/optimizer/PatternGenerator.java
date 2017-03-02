@@ -5,12 +5,11 @@ import java.util.Random;
 
 public class PatternGenerator {
 	
-	// Generates k short patterns of length l using t event types 
-	// Generates n long pattern of length m*l from these short patterns 
+	// Generates n long patterns of length m*l from k random short patterns of length l 
 	public static ArrayList<Pattern> getPatterns(int k, int l, int t, int n, int m) {
 		 
 		 ArrayList<Pattern> long_patterns = new ArrayList<Pattern>();		 
-		 ArrayList<Pattern> short_patterns = RandomPatternGenerator.getRandomPatterns(k,l,t);
+		 ArrayList<Pattern> short_patterns = getRandomPatterns(k,l,t);
 		 
 		 Random random = new Random();
 		 for (int i=0; i<n; i++) {
@@ -26,5 +25,22 @@ public class PatternGenerator {
 		}
 		return long_patterns;
 	 }
-
+	
+	// Randomly generates k short patterns of length l using t event types 
+	public static ArrayList<Pattern> getRandomPatterns(int k, int l, int t) {
+			 
+		 ArrayList<Pattern> random_patterns = new ArrayList<Pattern>();
+		 Random random = new Random();
+		 for (int i=0; i<k; i++) {
+			 String p = "";
+			 for (int j=0; j<l; j++) {
+				int event_type = random.nextInt(t) + 1;
+				p += event_type;
+			 }
+			 Pattern pattern = new Pattern(p);
+			 random_patterns.add(pattern);
+			 //System.out.println(pattern.toString());
+		}
+		return random_patterns;
+	}
 }
