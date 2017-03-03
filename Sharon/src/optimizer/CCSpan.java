@@ -16,17 +16,25 @@ public class CCSpan {
 	     // Exclude those patterns that appear in only one pattern and compute BValue of frequent patterns
 	     Set<String> keys = results.keySet();
 	     ArrayList<Pattern> removed = new ArrayList<Pattern>();
+	     int number_of_patterns = 0;
+	     int number_of_beneficial_patterns = 0;
 	     for (String key : keys) {
 	    	 Pattern p = results.get(key);
-	    	 if (!p.isFrequent()) {
+	    	 if (!p.isFrequent() || p.pattern.length()<2) {
 	    		removed.add(p);
 	    	 	//System.out.println("Infrequent pattern " + p.toString());
 	    	 } else {
-	    		System.out.println("Frequent pattern " + p.toString() + 
-	    				" with BValue " + p.getBValue(rates) +
+	    		int bvalue =  p.getBValue(rates);
+	    		if (bvalue > 0) {
+	    			System.out.println("Frequent beneficial pattern " + p.toString() + 
+	    				" with BValue " + bvalue +
 	    				" appears in " + p.patterns.size() + " patterns");
+	    			number_of_beneficial_patterns++;
+	    		}
+	    		number_of_patterns++;
 	    	 }
 	     }
+	     System.out.println(number_of_beneficial_patterns + " of " + number_of_patterns + " are beneficial.");
 	     for (Pattern p : removed)
 	    	 results.remove(p);
 	     
