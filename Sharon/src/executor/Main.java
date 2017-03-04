@@ -78,7 +78,7 @@ public class Main {
 			if (algorithm.equals("shared")) {
 				// Aseq.shared(queries,events);
 			} else {
-				// spass
+				Spass.shared(queries,events);
 			}}	
 		
 	    } catch (FileNotFoundException e) { e.printStackTrace(); }

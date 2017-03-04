@@ -2,6 +2,7 @@ package executor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.math.BigInteger;
 import event.*;
 
 public class Aseq {
@@ -15,7 +16,7 @@ public class Aseq {
 		for  (String query : queries) {	
 			
 			HashMap<String,ArrayList<Integer>> type_to_lengths = new HashMap<String,ArrayList<Integer>>(); 
-			HashMap<Integer,Integer> length_to_count = new HashMap<Integer,Integer>();
+			HashMap<Integer,BigInteger> length_to_count = new HashMap<Integer,BigInteger>();
 				
 			for (int i=0; i<query.length(); i++) {
 					
@@ -24,24 +25,23 @@ public class Aseq {
 				lengths.add(i);
 				type_to_lengths.put(type,lengths);
 				
-				length_to_count.put(i,0);					
+				length_to_count.put(i,BigInteger.ZERO);					
 			}
 				
 			// For each event of type E, update the counters for lengths E maps to
 			for (Event event : events) {
 					
-				HashMap<Integer,Integer> new_length_to_count = new HashMap<Integer,Integer>();
+				HashMap<Integer,BigInteger> new_length_to_count = new HashMap<Integer,BigInteger>();
 				ArrayList<Integer> lengths = (type_to_lengths.containsKey(event.type)) ? type_to_lengths.get(event.type) : new ArrayList<Integer>();
 				for (Integer l : lengths) {
 						
-					int count = 0;
+					BigInteger count = BigInteger.ZERO;
 					// This event is a start event
-					if (l-1<0) count = length_to_count.get(l)+1;
+					if (l-1<0) count = length_to_count.get(l).add(BigInteger.ONE);
 					// This event can be appended to existing sequences
-					if (l-1>=0 && length_to_count.get(l-1)>0) count = length_to_count.get(l-1) + length_to_count.get(l);
+					if (l-1>=0 && length_to_count.get(l-1).compareTo(BigInteger.ZERO)==1) count = length_to_count.get(l-1).add(length_to_count.get(l));
 					// If the count is set, update the table
-					if (count>0) {
-						new_length_to_count.put(l,count);
+					if (count.compareTo(BigInteger.ZERO)==1) {new_length_to_count.put(l,count);
 						//System.out.println(event + " updates the count for length " + l + " to " + count);
 					}
 				}					
@@ -51,8 +51,8 @@ public class Aseq {
 			}		
 					
 			// Print the count per query
-			int result = length_to_count.get(query.length()-1);
-			System.out.println("Query " + query + " has result " + result);	
+			BigInteger result = length_to_count.get(query.length()-1);
+			System.out.println("Query " + query + " has result " + result.toString());	
 			memory += query.length();
 		}
 			

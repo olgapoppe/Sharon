@@ -1,11 +1,15 @@
 package event;
 
-public abstract class Event {
+import java.util.ArrayList;
+
+public class Event {
 	
 	public String type; 
+	public ArrayList<Event> pointers;
 	
 	public Event (String t) {
 		type = t;
+		pointers = new ArrayList<Event>();
 	}
 
 	public static Event parse (String line, String type) {
