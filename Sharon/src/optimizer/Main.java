@@ -7,7 +7,8 @@ import java.util.Random;
 import iogenerator.*;
 
 // -n 10 -m 5 -k 3 -l 5 -t 5 -stream ../../../commerce/stream.txt -queries ../../../commerce/queries.txt
-//-n 10 -m 5 -k 3 -l 5 -t 4 -queries ../../../commerce/queries.txt
+// -n 10 -m 5 -k 3 -l 5 -t 4 -queries ../../../commerce/queries.txt
+// -n 10 -m 5 -k 3 -l 5 -t 10 -queries ../../../taxi/queries.txt
 
 public class Main {
 	
@@ -45,7 +46,7 @@ public class Main {
 		 }	
 		 
 		 /*** Generate input event stream for given rates per event type ***/
-		 if (file_of_stream.length()>0) StreamGenerator.getStream(rates,file_of_stream);		 
+		 if (file_of_stream.length()>0) CommerceStreamGenerator.getStream(rates,file_of_stream);		 
 		 		 
 		 /*** Generate n patterns of length m*l using t event types ***/
 		 System.out.println("\n*** " + n + " patterns of length " + (m*l) + " composed of " + t + " event types: ***");

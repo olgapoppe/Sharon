@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 
-public class StreamGenerator {
+public class CommerceStreamGenerator {
 	
 	// Generate input event stream for given rates per event type
 	public static void getStream(HashMap<String,Integer> rates, String file_of_stream) {

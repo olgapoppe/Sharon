@@ -10,6 +10,7 @@ import event.*;
 
 // -type commerce -stream ../../../commerce/stream.txt -queries ../../../commerce/queries.txt -algo nonshared -epw 80
 // -type traffic -stream ../../../LR/traffic.dat -queries ../../../LR/queries.txt -algo nonshared -epw 1000
+// -type taxi -stream ../../../taxi/yellow_tripdata_2014-10.csv -queries ../../../taxi/queries.txt -algo nonshared -epw 10
 
 public class Main {
 	
