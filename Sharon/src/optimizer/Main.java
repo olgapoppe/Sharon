@@ -6,9 +6,9 @@ import java.util.Random;
 
 import iogenerator.*;
 
-// -n 10 -m 5 -k 3 -l 5 -t 5 -stream ../../../commerce/stream.txt -queries ../../../commerce/queries.txt
-// -n 10 -m 5 -k 3 -l 5 -t 4 -queries ../../../commerce/queries.txt
-// -n 10 -m 5 -k 3 -l 5 -t 10 -queries ../../../taxi/queries.txt
+// -n 20 -m 2 -k 5 -l 5 -t 5 -stream ../../../commerce/stream.txt -queries ../../../commerce/queries.txt
+// -n 20 -m 2 -k 5 -l 5 -t 4 -queries ../../../LR/queries.txt
+// -n 20 -m 2 -k 5 -l 5 -t 10 -queries ../../../taxi/queries.txt
 
 public class Main {
 	

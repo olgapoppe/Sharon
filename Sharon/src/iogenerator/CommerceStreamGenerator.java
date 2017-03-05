@@ -28,7 +28,7 @@ public class CommerceStreamGenerator {
 			//System.out.println("String " + string);	
 			
 			// Store the string to file
-			for (int i=0; i<100; i++) {
+			for (int i=0; i<1000; i++) {
 				 output.append(string); 
 			}			
 			

@@ -17,7 +17,7 @@ public class Spass {
 		int pointers = 0;
 		
 		// For each query, iterate over its types, create a stack for each type, store events in it, construct the sequences and count them
-		for  (String query : queries) {	
+		String query = queries.get(0);	
 			
 			HashMap<String,ArrayList<Integer>> type_to_lengths = new HashMap<String,ArrayList<Integer>>(); 
 			HashMap<Integer,Stack<Event>> length_to_stack = new HashMap<Integer,Stack<Event>>();
@@ -56,17 +56,19 @@ public class Spass {
 					}
 				}
 				for (Integer l : lengths) {
-					if (new_length_to_stack.containsKey(l)) length_to_stack.put(l,new_length_to_stack.get(l));						
+					if (new_length_to_stack.containsKey(l)) {
+						Stack<Event> result = new_length_to_stack.get(l);
+						length_to_stack.put(l,result);
+						//System.out.println("Length " + l + " count " + result.size());
+					}
 				}
 			}	
 			// Traverse the pointers
-			Stack<Event> last_stack = length_to_stack.get(query.length()-1);
-			ArrayList<EventSequence> results = new ArrayList<EventSequence>();
-			for (Event last_event : last_stack)
-				traversePointers(last_event, new Stack<Event>(), results);
-			
-			System.out.println("Query " + query + " has result " + results.size());	
-		}
+			Stack<Event> last_stack = (length_to_stack.containsKey(query.length()-1)) ? length_to_stack.get(query.length()-1) : new Stack<Event>();
+			BigInteger count = BigInteger.ZERO;
+			for (Event last_event : last_stack) count = count.add(traversePointers(last_event, new Stack<Event>()));
+			System.out.println("Query " + query + " has result " + count.toString());	
+		
 		memory = events.size()+pointers;	
 			
 		long end = System.currentTimeMillis();
@@ -74,30 +76,35 @@ public class Spass {
 	}
 	
 	// DFS in the stack
-	public static void traversePointers (Event event, Stack<Event> current_sequence, ArrayList<EventSequence> results) {       
+	public static BigInteger traversePointers (Event event, Stack<Event> current_sequence) {
+		
+		BigInteger count = BigInteger.ZERO;
 				
 		current_sequence.push(event);
 		//System.out.println("pushed " + event);
 		
 		 if (event.pointers.isEmpty()) {   
 	        	 	
-	        	Iterator<Event> iter = current_sequence.iterator();
-	        	EventSequence result = new EventSequence(new ArrayList<Event>());
-	        	while(iter.hasNext()) {
-	        		Event e = iter.next();
-	        		result.events.add(e);
-	        	}
-	        	results.add(result);	        	
-				//System.out.println("result " + result);
+	       	Iterator<Event> iter = current_sequence.iterator();
+	       	EventSequence result = new EventSequence(new ArrayList<Event>());
+	       	while(iter.hasNext()) {
+	       		Event e = iter.next();
+	       		result.events.add(e);
+	       	}
+	       	count = BigInteger.ONE;
+	       	//results.add(result);	        	
+			//System.out.println("result " + result);
 				
-	        } else {
+	       } else {
 	        /*** Recursive case: Traverse the following nodes. ***/        	
 	        	for(Event prev_event : event.pointers) {        		
 	        		//System.out.println("following of " + node.event.id + " is " + following.event.id);
-	        		traversePointers(prev_event,current_sequence,results);        		
+	        		count = count.add(traversePointers(prev_event,current_sequence));        		
 	        	}        	
-	        }
+	       }
 	     Event top = current_sequence.pop();
 	     //System.out.println("popped " + top.event.id);
+	     
+	     return count;
 	}		
 }
