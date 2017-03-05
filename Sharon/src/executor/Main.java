@@ -72,13 +72,13 @@ public class Main {
 			stream_scanner.close();
 		
 			/*** ALGORITHMS ***/
-			if (algorithm.equals("nonshared")) {
-				Aseq.nonshared(queries,events);
+			if (algorithm.equals("spass")) {
+				Spass.execute(queries,events);
 			} else {
-			if (algorithm.equals("shared")) {
-				// Aseq.shared(queries,events);
+			if (algorithm.equals("aseq")) {
+				Aseq.execute(queries,events,false);
 			} else {
-				Spass.shared(queries,events);
+				Aseq.execute(queries,events,true);
 			}}	
 		
 	    } catch (FileNotFoundException e) { e.printStackTrace(); }

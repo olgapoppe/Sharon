@@ -7,7 +7,7 @@ import event.*;
 
 public class Aseq {
 	
-	public static void nonshared (ArrayList<String> queries, ArrayList<Event> events) {
+	public static void execute (ArrayList<String> queries, ArrayList<Event> events, boolean shared) {
 		
 		long start = System.currentTimeMillis();
 		int memory = 0;
@@ -54,6 +54,8 @@ public class Aseq {
 			BigInteger result = length_to_count.get(query.length()-1);
 			System.out.println("Query " + query + " has result " + result.toString());	
 			memory += query.length();
+			
+			if (shared) break;
 		}
 			
 		long end = System.currentTimeMillis();

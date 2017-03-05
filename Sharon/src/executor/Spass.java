@@ -5,12 +5,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Stack;
-
 import event.*;
 
 public class Spass {
 	
-	public static void shared (ArrayList<String> queries, ArrayList<Event> events) {
+	public static void execute (ArrayList<String> queries, ArrayList<Event> events) {
 		
 		long start = System.currentTimeMillis();
 		int memory = 0;
