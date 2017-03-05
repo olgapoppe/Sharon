@@ -35,23 +35,29 @@ public class Spass {
 			// For each event of type E, store the event in the stack for type E, connect to all events in the previous stack
 			for (Event event : events) {
 							
+				HashMap<Integer,Stack<Event>> new_length_to_stack = new HashMap<Integer,Stack<Event>>();
 				ArrayList<Integer> lengths = (type_to_lengths.containsKey(event.type)) ? type_to_lengths.get(event.type) : new ArrayList<Integer>();
 				for (Integer l : lengths) {
 					
 					if (l>0) {
 						Stack<Event> prev_stack = length_to_stack.get(l-1);
 						if (!prev_stack.isEmpty()) {
-							Stack<Event> stack = length_to_stack.get(l);
+							Stack<Event> new_stack = new Stack<Event>();
+							new_stack.addAll(length_to_stack.get(l));
 							Event cloned_event = new Event(event.type);
-							stack.add(cloned_event);
 							cloned_event.pointers.addAll(prev_stack);
-							pointers += prev_stack.size();						
+							pointers += prev_stack.size();
+							new_stack.add(cloned_event);
+							new_length_to_stack.put(l,new_stack);
 						}
 					} else {
 						Stack<Event> stack = length_to_stack.get(l);
 						stack.add(event);
 					}
-				}					
+				}
+				for (Integer l : lengths) {
+					if (new_length_to_stack.containsKey(l)) length_to_stack.put(l,new_length_to_stack.get(l));						
+				}
 			}	
 			// Traverse the pointers
 			Stack<Event> last_stack = length_to_stack.get(query.length()-1);
