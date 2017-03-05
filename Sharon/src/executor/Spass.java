@@ -13,7 +13,7 @@ public class Spass {
 		
 		long start = System.currentTimeMillis();
 		int memory = 0;
-		int pointers = 0;
+		int pointers = 0;		
 		
 		// For each query, iterate over its types, create a stack for each type, store events in it, construct the sequences and count them
 		String query = queries.get(0);	
@@ -66,7 +66,7 @@ public class Spass {
 			Stack<Event> last_stack = (length_to_stack.containsKey(query.length()-1)) ? length_to_stack.get(query.length()-1) : new Stack<Event>();
 			BigInteger count = BigInteger.ZERO;
 			for (Event last_event : last_stack) count = count.add(traversePointers(last_event, new Stack<Event>()));
-			System.out.println("Query " + query + " has result " + count.toString());	
+			//System.out.println("Query " + query + " has result " + count.toString());	
 		
 		memory = events.size()+pointers;	
 			

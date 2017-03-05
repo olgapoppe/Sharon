@@ -33,6 +33,7 @@ public class Main {
 		
 		String algorithm = "nonshared";
 		int events_per_window = Integer.MAX_VALUE;
+		int query_number = Integer.MAX_VALUE;
 						
 		// Read input parameters
 	    for (int i=0; i<args.length; i++){
@@ -41,6 +42,7 @@ public class Main {
 			if (args[i].equals("-queries")) 	file_of_queries = args[++i];
 			if (args[i].equals("-algo")) 		algorithm = args[++i];
 			if (args[i].equals("-epw")) 		events_per_window = Integer.parseInt(args[++i]);
+			if (args[i].equals("-qn"))	 		query_number = Integer.parseInt(args[++i]);
 		}	    	    
 	        
 	    // Print input parameters
@@ -76,9 +78,9 @@ public class Main {
 				Spass.execute(queries,events);
 			} else {
 			if (algorithm.equals("aseq")) {
-				Aseq.execute(queries,events,false);
+				Aseq.execute(queries,events,false,query_number);
 			} else {
-				Aseq.execute(queries,events,true);
+				Aseq.execute(queries,events,true,query_number);
 			}}	
 		
 	    } catch (FileNotFoundException e) { e.printStackTrace(); }

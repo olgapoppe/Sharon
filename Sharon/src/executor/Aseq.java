@@ -7,10 +7,11 @@ import event.*;
 
 public class Aseq {
 	
-	public static void execute (ArrayList<String> queries, ArrayList<Event> events, boolean shared) {
+	public static void execute (ArrayList<String> queries, ArrayList<Event> events, boolean shared, int query_number) {
 		
 		long start = System.currentTimeMillis();
 		int memory = 0;
+		int query_count = 0;
 		
 		// For each query, iterate over its types, map each type to lengths, map length to count
 		for  (String query : queries) {	
@@ -52,10 +53,11 @@ public class Aseq {
 					
 			// Print the count per query
 			BigInteger result = length_to_count.get(query.length()-1);
-			System.out.println("Query " + query + " has result " + result.toString());	
+			//System.out.println("Query " + query + " has result " + result.toString());	
 			memory += query.length();
+			query_count++;
 			
-			if (shared) break;
+			if (shared || query_count>=query_number) break;
 		}
 			
 		long end = System.currentTimeMillis();
