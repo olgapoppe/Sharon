@@ -50,6 +50,7 @@ public class Main {
 	    					//"\nInput file: " + input +
 	    					"\nAlgorithm: " + algorithm +
 	    					"\nEvents per window: " + events_per_window +
+	    					"\nNumber of queries: " + query_number +
 							"\n----------------------------------");	
 	    
 	    /*** Parsing queries and event stream ***/

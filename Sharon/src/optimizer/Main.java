@@ -6,9 +6,15 @@ import java.util.Random;
 
 import iogenerator.*;
 
-// -n 20 -m 2 -k 5 -l 5 -t 5 -stream ../../../commerce/stream.txt -queries ../../../commerce/queries.txt
-// -n 20 -m 2 -k 5 -l 5 -t 4 -queries ../../../LR/queries.txt
-// -n 20 -m 2 -k 5 -l 5 -t 10 -queries ../../../taxi/queries.txt
+// Query number
+// -n 180 -m 2 -k 5 -l 5 -t 5 -stream ../../../commerce/stream.txt -queries ../../../commerce/queries.txt
+// -n 180 -m 2 -k 5 -l 5 -t 4 -queries ../../../LR/queries.txt
+// -n 180 -m 2 -k 5 -l 5 -t 10 -queries ../../../taxi/queries.txt
+
+// Query length
+// -n 20 -m 1 -k 5 -l 5 -t 5 -stream ../../../commerce/stream.txt -queries ../../../commerce/queries5.txt
+// -n 20 -m 1 -k 5 -l 5 -t 4 -queries ../../../LR/queries5.txt
+// -n 20 -m 1 -k 5 -l 5 -t 10 -queries ../../../taxi/queries5.txt
 
 public class Main {
 	
