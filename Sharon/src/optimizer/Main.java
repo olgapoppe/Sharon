@@ -62,14 +62,19 @@ public class Main {
 		 System.out.println("\n*** Frequent patterns: ***");
 		 HashMap<String,Pattern> frequentPatterns = CCSpan.getFrequentPatterns(randomPatterns,rates);
 		 
+		 /*** Construct PBC Graph ***/
+		 System.out.println("\n*** PBC Graph: ***");
+		 Graph G = new Graph(frequentPatterns);
+		 System.out.println(G);
+		 
 		 /*** Get shared patterns from frequent patterns ***/
 		 System.out.println("\n*** Shared patterns created by " + algo + " algorithm: ***");
 		 ArrayList<Pattern> sharedPatterns = new ArrayList<Pattern>();
 		 long start =  System.currentTimeMillis();
 		 /*switch (algo) {
-		 case 0: sharedPatterns = ExhautiveSearch(frequentPatterns);
-		 case 1: sharedPatterns = GWMIN(frequentPatterns);
-		 case 2: sharedPatterns = BnB(frequentPatterns);
+		 case 0: sharedPatterns = ExhautiveSearch(G);
+		 case 1: sharedPatterns = GWMIN(G);
+		 case 2: sharedPatterns = BnB(G);
 		 }*/	
 		 long end =  System.currentTimeMillis();
 		 System.out.println("Duration: " + (end - start));

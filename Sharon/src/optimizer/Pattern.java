@@ -2,6 +2,8 @@ package optimizer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Pattern {
 	
@@ -9,11 +11,13 @@ public class Pattern {
 	// A list of patterns this pattern appears within
 	public ArrayList<String> patterns;
 	public int BValue;
+	private int degree;
 	
 	Pattern(String p) {
 		pattern = p;
 		patterns = new ArrayList<String>();
 		BValue = 0;
+		degree = 0;
 	}
 	
 	public boolean isFrequent() {
@@ -59,6 +63,43 @@ public class Pattern {
 		}
 		BValue = ns_cost - s_cost;				
 		return BValue;
+	}
+	
+	public int getBValue() {
+		return BValue;
+	}
+	
+	public void changeDegree(int num) {
+		degree += num;
+	}
+	
+	public int getDegree() {
+		return degree;
+	}
+	
+	public boolean conflictsWith(Pattern p) {
+		Set<String> intersection = new HashSet<String>(patterns);
+		intersection.retainAll(p.getQueries());
+		if (intersection.size() == 0) {
+			return false;
+		}
+		String p_lab = p.toString();
+		for (int i=0; i<pattern.length(); i++) {
+			for (int j=0; j<p_lab.length(); j++) {
+				int k=0;
+				while (i+k+1<=pattern.length() && j+k+1<=p_lab.length()) {
+					if (pattern.substring(i, i+k+1).equals(p_lab.substring(j, j+k+1))) {
+						return true;
+					}
+					k++;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public Set<String> getQueries() {
+		return new HashSet<String>(patterns);
 	}
 	
 	public String patternsToString() {
