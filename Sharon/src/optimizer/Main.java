@@ -2,7 +2,9 @@ package optimizer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 import iogenerator.*;
 
@@ -69,14 +71,20 @@ public class Main {
 		 
 		 /*** Get shared patterns from frequent patterns ***/
 		 System.out.println("\n*** Shared patterns created by " + algo + " algorithm: ***");
-		 ArrayList<Pattern> sharedPatterns = new ArrayList<Pattern>();
+		 Set<String> sharedPatterns = new HashSet<String>();
 		 long start =  System.currentTimeMillis();
-		 /*switch (algo) {
-		 case 0: sharedPatterns = ExhautiveSearch(G);
-		 case 1: sharedPatterns = GWMIN(G);
-		 case 2: sharedPatterns = BnB(G);
-		 }*/	
+		 switch (algo) {
+		 case 0: sharedPatterns = SharingPlanSelection.exhaustive(G);
+		 break;
+		 case 1: sharedPatterns = SharingPlanSelection.gwmin(G);
+		 break;
+		 case 2: sharedPatterns = SharingPlanSelection.sharon(G);
+		 break;
+		 }	
 		 long end =  System.currentTimeMillis();
+		 for (String s : sharedPatterns) {
+				System.out.println(s);
+			}
 		 System.out.println("Duration: " + (end - start));
 	}
 }
