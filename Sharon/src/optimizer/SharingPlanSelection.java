@@ -36,6 +36,11 @@ public class SharingPlanSelection {
 			}
 			G.removeVertex(v_i);
 		}
+		
+		int M = 0;
+		for (String s : I) { M += s.length()*2; }
+		System.out.println("Size: " + M);
+		
 		return I;
 	}
 	
@@ -157,21 +162,30 @@ public class SharingPlanSelection {
 		}
 		
 		// Start BnB
+		int M = 0;
+		int tempM = 0;
+		
 		for (String vname : G.getVnames()) {
 			Level.add(new LinkedList<String>(Arrays.asList(vname)));
 		}
 		
 		while (Level.size() > 0) {
+			tempM = 0;
 			for (LinkedList<String> P : Level) {
 				if (score(G, P) > max) {
 					opt.clear();
 					opt.addAll(P);
 					max = score(G, P);
 				}
+				
+				for (String s : P) { tempM += s.length()*2; }
+				if (tempM > M) { M = tempM; }
+				
 			}
 			Level = getNextLevel(G, Level, true);
 		}
 		opt.addAll(S);
+		System.out.println("Size: " + M);
 		return opt;
 	}
 	
@@ -180,20 +194,29 @@ public class SharingPlanSelection {
 		int max = 0;
 		LinkedList<LinkedList<String>> Level = new LinkedList<LinkedList<String>>();
 		
+		int M = 0;
+		int tempM = 0;
+		
 		for (String vname : G.getVnames()) {
 			Level.add(new LinkedList<String>(Arrays.asList(vname)));
 		}
 		
 		for (int i = 1; i <= G.numVertices(); i++) {
+			tempM = 0;
 			for (LinkedList<String> P : Level) {
 				if (isValid(G, P) && score(G, P) > max) {
 					opt.clear();
 					opt.addAll(P);
 					max = score(G, P);
 				}
+				
+				for (String s : P) { tempM += s.length()*2; }
+				if (tempM > M) { M = tempM; }
+				
 			}
 			Level = getNextLevel(G, Level, false);
 		}
+		System.out.println("Size: " + M);
 		return opt;
 	}
 }

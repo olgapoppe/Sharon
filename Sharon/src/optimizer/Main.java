@@ -82,9 +82,9 @@ public class Main {
 		 break;
 		 }	
 		 long end =  System.currentTimeMillis();
+		 System.out.println("Duration: " + (end - start));
 		 for (String s : sharedPatterns) {
 				System.out.println(s);
-			}
-		 System.out.println("Duration: " + (end - start));
+			}	 
 	}
 }

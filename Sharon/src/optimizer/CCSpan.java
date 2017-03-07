@@ -10,7 +10,7 @@ public class CCSpan {
 		 
 		 HashMap<String,Pattern> results = new HashMap<String,Pattern>();		 
 	     for (Pattern p : randomPatterns) {
-	    	 results = getSubpatterns(p.pattern,results);		    	 
+	    	 results = getSubpatterns(p.pattern,results);
 	     }	
 	     
 	     // Exclude those patterns that appear in only one pattern and compute BValue of frequent patterns
@@ -20,7 +20,7 @@ public class CCSpan {
 	     int number_of_beneficial_patterns = 0;
 	     for (String key : keys) {
 	    	 Pattern p = results.get(key);
-	    	 if (!p.isFrequent() || p.pattern.length()<2) {
+	    	 if (!p.isFrequent() || p.pattern.length()<4) {
 	    		removed.add(p);
 	    	 	//System.out.println("Infrequent pattern " + p.toString());
 	    	 } else {
@@ -46,10 +46,11 @@ public class CCSpan {
 		for (int end=0; end<=pattern.length(); end++) {
 			 for (int start=0; start<=end; start++) {
 				 String subpattern = pattern.substring(start,end);
-				 if (subpattern.length() > 0) {
+				 if (subpattern.length() > 0 && subpattern.charAt(0)!=',' && subpattern.charAt(subpattern.length()-1)==',') {
 					 Pattern p = (results.containsKey(subpattern)) ? results.get(subpattern) : new Pattern(subpattern);
 					 p.add2Patterns(pattern);
-					 results.put(subpattern, p);					 
+					 if (subpattern.length() > 0) {
+						 results.put(subpattern, p);	}				 
 				 }				 
 		 }}
 		 return results;

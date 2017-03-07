@@ -47,7 +47,7 @@ public class PatternGenerator {
 			 String p = "";
 			 for (int j=0; j<l; j++) {
 				int event_type = random.nextInt(t);
-				p += event_type;
+				p += event_type + ",";
 			 }
 			 Pattern pattern = new Pattern(p);
 			 random_patterns.add(pattern);

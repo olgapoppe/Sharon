@@ -32,7 +32,16 @@ public class Pattern {
 	public int getBValue(HashMap<String,Integer> rates) {
 		
 		int cost_pattern = 0;
-		for (int i=0; i<pattern.length(); i++) { cost_pattern = rates.get(pattern.charAt(i)+""); }
+		String temp = "";
+		
+		for (int i=0; i<pattern.length(); i++) { 
+			if (pattern.charAt(i) != ',') {
+				temp += pattern.charAt(i);
+			} else {
+			cost_pattern = rates.get(temp); 
+			temp = "";
+			}
+		}
 		int ns_cost = 0;
 		int s_cost = rates.get(pattern.charAt(0)+"") * cost_pattern;
 	
@@ -52,8 +61,31 @@ public class Pattern {
 			/*** Non-shared method ***/
 			int cost_prefix = 0;
 			int cost_suffix =0;
-			for (int i=0; i<prefix.length(); i++) { cost_prefix = rates.get(prefix.charAt(i)+""); }
-			for (int i=0; i<suffix.length(); i++) { cost_suffix = rates.get(suffix.charAt(i)+""); }		
+			if (prefix.length() > 0) {
+				if (prefix.charAt(0) == ',') { prefix = prefix.substring(1); }
+				if (prefix.charAt(prefix.length()-1) != ',') { prefix += ','; }
+			}
+			if (suffix.length() > 0) {
+				if (suffix.charAt(0) == ',') { suffix = suffix.substring(1); }
+				if (suffix.charAt(suffix.length()-1) != ',') { suffix += ','; }
+			}
+			
+			for (int i=0; i<prefix.length(); i++) { 
+				if (prefix.charAt(i) != ',') {
+					temp += prefix.charAt(i);
+				} else {
+					cost_prefix = rates.get(temp);
+					temp = "";
+				}
+			}
+			for (int i=0; i<suffix.length(); i++) { 
+				if (suffix.charAt(i) != ',') {
+					temp += suffix.charAt(i);
+				} else {
+					cost_suffix = rates.get(temp);
+					temp = "";
+				}	
+			}
 			ns_cost += rates.get(super_pattern.charAt(0)+"") * (cost_prefix + cost_pattern + cost_suffix);	
 			
 			/*** Shared method ***/
@@ -84,12 +116,19 @@ public class Pattern {
 			return false;
 		}
 		String p_lab = p.toString();
+		String temp1 = "";
+		String temp2 = "";
 		for (int i=0; i<pattern.length(); i++) {
 			for (int j=0; j<p_lab.length(); j++) {
 				int k=0;
 				while (i+k+1<=pattern.length() && j+k+1<=p_lab.length()) {
-					if (pattern.substring(i, i+k+1).equals(p_lab.substring(j, j+k+1))) {
-						return true;
+					temp1 = pattern.substring(i, i+k+1);
+					temp2 = p_lab.substring(j, j+k+1);
+					if (temp1.equals(temp2) && pattern.charAt(i+k)==',') {
+						if (i==0 && j==0) { return true; }
+						else if (j==0 && i>0 && (pattern.charAt(i-1)==',')) { return true; }
+						else if (i==0 && j>0 && p_lab.charAt(j-1)==',') { return true; }
+						else if (i>0 && j>0 && (pattern.charAt(i-1)==',') && p_lab.charAt(j-1)==',') { return true; }
 					}
 					k++;
 				}
