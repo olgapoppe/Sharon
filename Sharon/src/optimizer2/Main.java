@@ -105,7 +105,7 @@ public class Main {
 		 HashMap<String,Pattern> frequentPatterns = CCSpan.getFrequentPatterns(randomPatterns,rates);
 		 
 		 /*** Construct PBC Graph ***/
-		 System.out.println("\n*** PBC Graph: ***");
+		 //System.out.println("\n*** PBC Graph: ***");
 		 Graph G = new Graph(frequentPatterns);
 		 //System.out.println(G);
 		 System.out.println("Number of Vertices: " + G.numVertices());
@@ -126,9 +126,10 @@ public class Main {
 		 }	
 		 long end =  System.currentTimeMillis();
 		 System.out.println("Duration: " + (end - start));
+		 /*
 		 for (String s : sharedPatterns) {
 				System.out.println(s);
 			}
-		  	 
+		  	 */
 	}
 }

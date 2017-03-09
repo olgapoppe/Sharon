@@ -32,7 +32,7 @@ public class CCSpan {
 	    		number_of_patterns++;
 	    	 }
 	     }
-	     System.out.println(number_of_beneficial_patterns + " of " + number_of_patterns + " are beneficial.");
+	     //System.out.println(number_of_beneficial_patterns + " of " + number_of_patterns + " are beneficial.");
 	     for (Pattern p : removed)
 	    	 results.remove(p);
 	     
