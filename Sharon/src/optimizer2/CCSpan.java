@@ -26,7 +26,7 @@ public class CCSpan {
 	    	 } else {
 	    		int bvalue =  p.getBValue(rates);
 	    		if (bvalue > 0) {
-	    			System.out.println("Frequent beneficial pattern " + p.toString() + " with BValue " + bvalue + " appears in " + p.patterns.size() + " patterns");
+	    			//System.out.println("Frequent beneficial pattern " + p.toString() + " with BValue " + bvalue + " appears in " + p.patterns.size() + " patterns");
 	    			number_of_beneficial_patterns++;
 	    		}
 	    		number_of_patterns++;
