@@ -94,6 +94,7 @@ public class Main {
 			 while ((line = reader.readLine()) != null) {
 			        Pattern pattern = new Pattern(line);
 			        randomPatterns.add(pattern);
+			        System.out.println(line);
 			    }
 
 			    reader.close();
