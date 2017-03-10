@@ -123,7 +123,7 @@ public class SharingPlanSelection {
 		Pattern v_temp;
 		LinkedList<LinkedList<String>> Level = new LinkedList<LinkedList<String>>();
 		int M = 0;
-		int SM = 0;
+		
 		ArrayList<Graph> CC = G.connectedComp();
 		
 		for (Graph comp : CC) {
@@ -146,7 +146,6 @@ public class SharingPlanSelection {
 				for (String vname : comp.getVnames()) {
 					if (comp.getVertex(vname).getDegree()==0) {
 						R.add(vname);
-						SM += vname.length()*2;
 					} else if (pscore(comp,vname) < min) {
 						T.add(vname);
 					}
@@ -193,7 +192,7 @@ public class SharingPlanSelection {
 			}
 			S.addAll(opt);
 		}
-		M += SM;
+		for (String s : S) { M += s.length()*2; }
 		System.out.println("Size: " + M);
 		return S;
 	}
