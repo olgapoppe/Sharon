@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import java.util.ArrayList;
 
 public class Graph {
@@ -41,12 +42,43 @@ public class Graph {
 		}
 	}
 	
+	public Graph(HashMap<String,Pattern> F, Graph G) {
+		Vnames = new LinkedHashSet<String>();
+		V = new HashMap<String, Pattern>();
+		E = new HashMap<Pattern, HashSet<Pattern>>();
+		nVerts = 0;
+		nEdges = 0;
+		Set<Pattern> added = new HashSet<Pattern>();
+		for (Pattern p : F.values()) {
+			if (p.getBValue()>0) {
+				this.addVertex(p);
+				for (Pattern p_prime : added) {
+					if(G.hasEdge(p.toString(), p_prime.toString())) {
+						this.addEdge(p.toString(), p_prime.toString());
+					}
+				}
+				added.add(p);
+			}
+		}
+	}
+	
 	public void addVertex(Pattern p) {
 		Pattern u = V.get(p.toString());
 		if (u==null) {
 			Vnames.add(p.toString());
 			V.put(p.toString(), p);
 			E.put(p, new HashSet<Pattern>());
+			nVerts++;
+		}
+	}
+	
+	public void addVertex(String lab, int w) {
+		Pattern u = V.get(lab);
+		if (u==null) {
+			Vnames.add(lab);
+			u = new Pattern(lab, w);
+			V.put(lab, u);
+			E.put(u, new HashSet<Pattern>());
 			nVerts++;
 		}
 	}
@@ -192,19 +224,40 @@ public class Graph {
 		}
 		
 		for (int i=0; i<compPatterns.size(); i++) {
-			components.add(new Graph(compPatterns.get(i)));
+			components.add(new Graph(compPatterns.get(i), this));
 		}
 		
 		return components;
 	}
 	
+	public String toString2() {
+		HashMap<String, String> names4print = new HashMap<String, String>();
+		int name = 0;
+		for (String v : Vnames) {
+			names4print.put(v, name+"");
+			name++;
+		}
+		
+		String s = "";
+		for (Pattern u : V.values()) {
+			s += names4print.get(u.toString()) + ":";
+			for (Pattern v : E.get(u)) {
+				s += names4print.get(v.toString()) + " ";
+			}
+			s += ":" + u.getBValue();
+			s += "\n";
+		}
+		return s;
+	}
+	
 	public String toString() {
 		String s = "";
 		for (Pattern u : V.values()) {
-			s += u + ": ";
+			s += u.toString() + ":";
 			for (Pattern v : E.get(u)) {
-				s += v + " ";
+				s += v.toString() + " ";
 			}
+			s += ":" + u.getBValue();
 			s += "\n";
 		}
 		return s;

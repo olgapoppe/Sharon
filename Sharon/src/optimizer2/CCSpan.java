@@ -16,8 +16,8 @@ public class CCSpan {
 	     // Exclude those patterns that appear in only one pattern and compute BValue of frequent patterns
 	     Set<String> keys = results.keySet();
 	     ArrayList<Pattern> removed = new ArrayList<Pattern>();
-	     int number_of_patterns = 0;
-	     int number_of_beneficial_patterns = 0;
+	     //int number_of_patterns = 0;
+	     //int number_of_beneficial_patterns = 0;
 	     for (String key : keys) {
 	    	 Pattern p = results.get(key);
 	    	 if (!p.isFrequent() || p.pattern.length()<4) {
@@ -26,10 +26,10 @@ public class CCSpan {
 	    	 } else {
 	    		int bvalue =  p.getBValue(rates);
 	    		if (bvalue > 0) {
-	    			//System.out.println("Frequent beneficial pattern " + p.toString() + " with BValue " + bvalue + " appears in " + p.patterns.size() + " patterns");
-	    			number_of_beneficial_patterns++;
+	    			System.out.println("Frequent beneficial pattern " + p.toString() + " with BValue " + bvalue + " appears in " + p.patterns.size() + " patterns");
+	    			//number_of_beneficial_patterns++;
 	    		}
-	    		number_of_patterns++;
+	    		//number_of_patterns++;
 	    	 }
 	     }
 	     //System.out.println(number_of_beneficial_patterns + " of " + number_of_patterns + " are beneficial.");
@@ -45,10 +45,12 @@ public class CCSpan {
 			 for (int start=0; start<=end; start++) {
 				 String subpattern = pattern.substring(start,end);
 				 if (subpattern.length() > 0 && subpattern.charAt(0)!=',' && subpattern.charAt(subpattern.length()-1)==',') {
-					 Pattern p = (results.containsKey(subpattern)) ? results.get(subpattern) : new Pattern(subpattern);
-					 p.add2Patterns(pattern);
-					 if (subpattern.length() > 0) {
-						 results.put(subpattern, p);	}				 
+					 if (start==0 || pattern.charAt(start-1)==',') {
+						 Pattern p = (results.containsKey(subpattern)) ? results.get(subpattern) : new Pattern(subpattern);
+						 p.add2Patterns(pattern);
+						 if (subpattern.length() > 0) {
+							 results.put(subpattern, p);	}	
+					 }
 				 }				 
 		 }}
 		 return results;

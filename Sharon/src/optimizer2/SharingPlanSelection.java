@@ -128,7 +128,7 @@ public class SharingPlanSelection {
 		
 		for (Graph comp : CC) {
 			max = 0;
-			//System.out.println(comp);
+			//System.err.println(comp);
 			// Graph reduction
 			reduce = true;
 			
@@ -153,12 +153,12 @@ public class SharingPlanSelection {
 				
 				for (String vname : R) {
 					comp.removeVertex(vname);
-					//System.err.println("reduction removed and saved " + vname);
+					System.err.println("reduction removed and saved " + vname);
 				}
 				
 				for (String vname : T) {
 					comp.removeVertex(vname);
-					//System.err.println("reduction removed " + vname);
+					System.err.println("reduction removed " + vname);
 				}
 				
 				if (R.size()==0 && T.size()==0) {

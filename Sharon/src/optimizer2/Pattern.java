@@ -20,6 +20,13 @@ public class Pattern {
 		degree = 0;
 	}
 	
+	Pattern(String p, int b) {
+		pattern = p;
+		patterns = new ArrayList<String>();
+		BValue = b;
+		degree = 0;
+	}
+	
 	public boolean isFrequent() {
 		return patterns.size() > 1;
 	}
