@@ -59,14 +59,15 @@ public class Main2 {
 		 
 		 } catch (IOException e) { e.printStackTrace(); }
 		 
-		 
+		 /*
 		 System.out.println(G);
 		 System.out.println("Number of Vertices: " + G.numVertices());
 		 System.out.println("Number of Edges: " + G.numEdges());
+		 */
 		 
 		 /*** Get shared patterns from frequent patterns ***/
 		
-		 System.out.println("\n*** Shared patterns created by " + algo + " algorithm: ***");
+		 //System.out.println("\n*** Shared patterns created by " + algo + " algorithm: ***");
 		 Set<String> sharedPatterns = new HashSet<String>();
 		 long start =  System.currentTimeMillis();
 		 switch (algo) {
@@ -80,9 +81,10 @@ public class Main2 {
 		 long end =  System.currentTimeMillis();
 		 System.out.println("Duration: " + (end - start));
 		 
+		 /*
 		 for (String s : sharedPatterns) {
 				System.out.println(s);
 			}
-		  	 
+		  */	 
 	}
 }
