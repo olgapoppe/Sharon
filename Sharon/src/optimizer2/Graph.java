@@ -104,6 +104,26 @@ public class Graph {
 		nVerts--;
 	}
 	
+	// generates id names for each vertex in clique
+	// draws an edge between each vertex in clique
+	public Set<String> addClique(Set<Pattern> C) {
+		Set<String> names = new HashSet<String>();
+		int count = 1;
+		for (Pattern p : C) {
+			String id = p.toString() + " ID " + count;
+			Pattern u = V.get(id);
+			if (u==null) {
+				Vnames.add(p.toString());
+				V.put(p.toString(), p);
+				E.put(p, new HashSet<Pattern>());
+				nVerts++;
+				names.add(id);
+				count++;
+			}
+		}
+		return names;
+	}
+	
 	public boolean hasVertex(String lab) {
 		return V.containsKey(lab);
 	}
@@ -116,7 +136,7 @@ public class Graph {
 		Pattern u = V.get(fr);
 		Pattern v = V.get(to);
 		if (u==null || v==null) {
-			System.err.println("Edge addition failed");
+			System.err.println("Edge addition failed between " + fr + " and " + to);
 			return;			// the vertices don't exist
 		}
 		if (E.get(u).add(v)) {

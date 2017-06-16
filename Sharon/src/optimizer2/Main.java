@@ -1,18 +1,15 @@
 package optimizer2;
 
-/*
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.util.Random;
-*/
+
 import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+
+// -n 20 -m 3 -k 40 -l 2 -t 100  -queries ../../experiments/queriesTEST.txt -rates ../../experiments/ratesTEST.txt -graph ../../experiments/graphTEST.txt
 
 public class Main {
 	
@@ -24,11 +21,12 @@ public class Main {
 		 int m = 0; // m*l is the length of long patterns
 		 int k = 0; // number of short patterns
 		 int l = 0; // length of short patterns
-		 int t = 0;	// event types
+		 int t = 0;	// event types, must be greater than l
 		 
-		 int algo = 0; // algorithm: 0 - Exhaustive search, 1 - GWMIN, 2 - B&B
 		 String file_of_queries = "";
 		 String file_of_rates = "";
+		 String file_of_graph = "";
+		 String file_of_PQ = "";
 		 
 		 for (int i=0; i<args.length; i++) {
 			 
@@ -38,16 +36,17 @@ public class Main {
 			if (args[i].equals("-l"))		l = Integer.parseInt(args[++i]);
 			if (args[i].equals("-t")) 		t = Integer.parseInt(args[++i]);
 			
-			if (args[i].equals("-algo")) 	algo = Integer.parseInt(args[++i]);
 			if (args[i].equals("-queries")) file_of_queries = args[++i];
 			if (args[i].equals("-rates")) 	file_of_rates = args[++i];
+			if (args[i].equals("-graph")) file_of_graph = args[++i];
+			if (args[i].equals("-PQ")) file_of_PQ = args[++i];
 		 }	
 		 
 		 /*** Generate random rates for t event types ***/
 		 HashMap<String,Integer> rates = new HashMap<String,Integer>();
-		 /*
+		 
 		 Random random = new Random();
-		 System.out.println("\n*** Event rate per event type: ***");
+		 //System.out.println("\n*** Event rate per event type: ***");
 		 
 		 try {			 
 				File output_file = new File(file_of_rates);
@@ -56,80 +55,46 @@ public class Main {
 			 for (int i=0; i<t; i++) {
 				 int rate = random.nextInt(t) + 1; 
 				 rates.put(i+"", rate);
-				 System.out.println("Event type " + i + " has rate " + rate);
+				 //System.out.println("Event type " + i + " has rate " + rate);
 				 
 				 output.append(i + ":" + rate + "\n");
 			 }
 			 output.close();
 		 } catch (IOException e) { e.printStackTrace(); }
-		 */
-		 
-		 try {
-		 String line;
-		 BufferedReader reader = new BufferedReader(new FileReader(file_of_rates));
-		 while ((line = reader.readLine()) != null) {
-		        String[] parts = line.split(":", 2);
-		        if (parts.length >= 2)
-		        {
-		            String key = parts[0];
-		            Integer value = Integer.parseInt(parts[1]);
-		            rates.put(key, value);
-		        } else {
-		            System.out.println("ignoring line: " + line);
-		        }
-		    }
-
-		    reader.close();
-		 } catch (IOException e) { e.printStackTrace(); }
-		 		 
-		 /*** Generate n patterns of length m*l using t event types ***/
-		 //System.out.println("\n*** " + n + " patterns of length " + (m*l) + " composed of " + t + " event types: ***");
+	
 		 ArrayList<Pattern> randomPatterns = PatternGenerator.getPatterns(k,l,t,n,m,file_of_queries);
 		 
-		 /*
-		 ArrayList<Pattern> randomPatterns = new ArrayList<Pattern>();
-		 try {
-			 String line;
-			 BufferedReader reader = new BufferedReader(new FileReader(file_of_queries));
-			 while ((line = reader.readLine()) != null) {
-			        Pattern pattern = new Pattern(line);
-			        randomPatterns.add(pattern);
-			    }
-
-			    reader.close();
-			 } catch (IOException e) { e.printStackTrace(); }		
-		 */
-		 
 		 /*** Get frequent patterns from random patterns ***/
-		 //System.out.println("\n*** Frequent patterns: ***");
+		 System.out.println("\n*** Frequent patterns: ***");
 		 HashMap<String,Pattern> frequentPatterns = CCSpan.getFrequentPatterns(randomPatterns,rates);
+		 
+		 try {			 
+				File output_file = new File(file_of_PQ);
+				BufferedWriter output = new BufferedWriter(new FileWriter(output_file));
+		 
+			for (Pattern freqP : frequentPatterns.values()) {
+				 output.append(freqP.toString() + ":" + freqP.patternsToString());
+			 }
+			 output.close();
+		 } catch (IOException e) { e.printStackTrace(); }
 		 
 		 /*** Construct PBC Graph ***/
 		 //System.out.println("\n*** PBC Graph: ***");
+		 long startConstruction = System.currentTimeMillis();
 		 Graph G = new Graph(frequentPatterns);
+		 long endConstruction = System.currentTimeMillis();
+		 System.out.println("\nDuration Construction: " + (endConstruction - startConstruction));
 		 //System.out.println(G);
-		 System.out.println("Number of Vertices: " + G.numVertices());
+		 System.out.println("\nNumber of Vertices: " + G.numVertices());
 		 System.out.println("Number of Edges: " + G.numEdges());
 		 
-		 /*** Get shared patterns from frequent patterns ***/
-		
-		 System.out.println("\n*** Shared patterns created by " + algo + " algorithm: ***");
-		 Set<String> sharedPatterns = new HashSet<String>();
-		 long start =  System.currentTimeMillis();
-		 switch (algo) {
-		 case 0: sharedPatterns = SharingPlanSelection.exhaustive(G);
-		 break;
-		 case 1: sharedPatterns = SharingPlanSelection.gwmin(G);
-		 break;
-		 case 2: sharedPatterns = SharingPlanSelection.sharon(G);
-		 break;
-		 }	
-		 long end =  System.currentTimeMillis();
-		 System.out.println("Duration: " + (end - start));
-		 
-		 for (String s : sharedPatterns) {
-				System.out.println(s);
-			}
+		 try 
+		 {
+			 File output_file = new File(file_of_graph);
+			 BufferedWriter output = new BufferedWriter(new FileWriter(output_file));
+			 output.append(G.toString());
+			 output.close();
+		 } catch (IOException e) { e.printStackTrace(); }
 		  	 
 	}
 }

@@ -2,6 +2,7 @@ package optimizer2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.Set;
 public class SharingPlanSelection {
 	// gwmin destroys the graph, so if you want to save the graph, make a copy of it.
 	public static Set<String> gwmin(Graph G) {
+		long startGWMIN = System.currentTimeMillis();
 		Set<String> I = new HashSet<String>();
 		double max;
 		double max_temp;
@@ -37,10 +39,12 @@ public class SharingPlanSelection {
 			}
 			G.removeVertex(v_i);
 		}
+		long endGWMIN = System.currentTimeMillis();
 		
 		int M = 0;
 		for (String s : I) { M += s.length()*2; }
-		System.out.println("Size: " + M);
+		System.out.println("\nSize: " + M);
+		System.out.println("\nDuration Sharing Plan Selection: " + (endGWMIN - startGWMIN));
 		
 		return I;
 	}
@@ -65,11 +69,22 @@ public class SharingPlanSelection {
 	}
 	
 	public static int pscore(Graph G, String v) {
+		HashMap<String, Integer> non_nbrs = new HashMap<String, Integer>();
 		int p = G.getVertex(v).getBValue();
 		for (String w : G.getVnames()) {
 			if (!G.hasEdge(v, w)) {
-				p += G.getVertex(w).getBValue();
+				if (non_nbrs.containsKey(G.getVertex(w).toString())) { 
+					if (non_nbrs.get(G.getVertex(w).toString()) < G.getVertex(w).getBValue()) {
+						non_nbrs.put(G.getVertex(w).toString(), G.getVertex(w).getBValue());
+					}
+				}
+				else {
+					non_nbrs.put(G.getVertex(w).toString(), G.getVertex(w).getBValue());
+				}
 			}
+		}
+		for (Integer NN : non_nbrs.values()) {
+			p += NN;
 		}
 		return p;
 	}
@@ -112,35 +127,75 @@ public class SharingPlanSelection {
 		return Children;
 	}
 	
+	// Clique generation
+	public static HashSet<Pattern> getClique(Graph G, String v) {
+		HashSet<Pattern> C = new HashSet<Pattern>();
+		
+		return C;
+	}
+	
+	// Sharing conflict resolution
+	public static Graph expand(Graph G_B) {
+		Graph G_E = new Graph();
+		HashSet<Pattern> C;
+		for (String v : G_B.getVnames()) {
+			C = getClique(G_B, v);
+			Set<String> c_names = G_E.addClique(C);
+			for (String v_prime : c_names) {
+				for (String u : G_E.getVnames()) {
+					if (G_E.getVertex(v_prime).conflictsWith(G_E.getVertex(u))) {
+						G_E.addEdge(v_prime, u);
+					}
+				}
+			}
+		}
+		
+		return G_E;
+	}
+	
 	// sharon reduces the graph, so if you want to save the graph, make a copy of it.
 	public static Set<String> sharon(Graph G) {
 		Set<String> opt = new HashSet<String>(); // used to store optimal sub-plans
 		Set<String> S = new HashSet<String>(); // to return
 		Set<String> R, T;
 		int max;
-		double min;
+		double min = 0;
 		boolean reduce;
 		Pattern v_temp;
 		LinkedList<LinkedList<String>> Level = new LinkedList<LinkedList<String>>();
 		int M = 0;
 		
 		ArrayList<Graph> CC = G.connectedComp();
+		long durExpansion = 0;
+		long durReduction = 0;
+		long durSharon = 0;
 		
 		for (Graph comp : CC) {
-			max = 0;
-			//System.err.println(comp);
+			//System.err.println("Component number of vertices: " + comp.numVertices());
+			//System.err.println(S);
+			
+			// Graph Expansion
+			long startExpansion = System.currentTimeMillis();
+			
+			// Calculate min of basic graph before expansion begins
+			for (String v_id : comp.getVnames()) {
+				v_temp = comp.getVertex(v_id);
+				min += (double) v_temp.getBValue() / (v_temp.getDegree() + 1);
+			}
+			
+			comp = expand(comp);
+			
+			long endExpansion = System.currentTimeMillis();
+			
+			durExpansion += (endExpansion - startExpansion);
+			
+			long startReduction = System.currentTimeMillis();
 			// Graph reduction
 			reduce = true;
 			
 			while (reduce) {
 				R = new HashSet<String>(); // non-conflict
 				T = new HashSet<String>(); // non-beneficial
-				min = 0;
-				for (String v_id : comp.getVnames()) {
-					v_temp = comp.getVertex(v_id);
-					min += (double) v_temp.getBValue() / (v_temp.getDegree() + 1);
-				}
-				
 				//System.err.println(min);
 				
 				for (String vname : comp.getVnames()) {
@@ -153,12 +208,12 @@ public class SharingPlanSelection {
 				
 				for (String vname : R) {
 					comp.removeVertex(vname);
-					System.err.println("reduction removed and saved " + vname);
+					//System.err.println("reduction removed and saved " + vname);
 				}
 				
 				for (String vname : T) {
 					comp.removeVertex(vname);
-					System.err.println("reduction removed " + vname);
+					//System.err.println("reduction removed " + vname);
 				}
 				
 				if (R.size()==0 && T.size()==0) {
@@ -168,7 +223,12 @@ public class SharingPlanSelection {
 				}
 			}
 			
-			// Start BnB
+			long endReduction = System.currentTimeMillis();
+			durReduction += (endReduction - startReduction);
+			
+			// Start Sharing Plan Selection
+			long startSharon = System.currentTimeMillis();
+			max = 0;
 			int tempM = 0;
 			
 			for (String vname : comp.getVnames()) {
@@ -191,14 +251,27 @@ public class SharingPlanSelection {
 				Level = getNextLevel(comp, Level, true);
 			}
 			S.addAll(opt);
+			long endSharon = System.currentTimeMillis();
+			durSharon += endSharon - startSharon;
 		}
+		
 		for (String s : S) { M += s.length()*2; }
-		System.out.println("Size: " + M);
+		System.out.println("\nSize: " + M);
+		System.out.println("\nDuration Expansion: " + durExpansion);
+		System.out.println("\nDuration Reduction: " + durReduction);
+		System.out.println("\nDuration Sharing Plan Selection: " + durSharon);
 		return S;
 	}
 	
 	/***Exhaustive***/
 	public static Set<String> exhaustive(Graph G) {
+		long startExpansion = System.currentTimeMillis();
+		G = expand(G);
+		long endExpansion = System.currentTimeMillis();
+		
+		System.out.println("\nDuration Expansion: " + (endExpansion - startExpansion));
+		
+		long startExh = System.currentTimeMillis();
 		Set<String> opt = new HashSet<String>();
 		int max = 0;
 		LinkedList<LinkedList<String>> Level = new LinkedList<LinkedList<String>>();
@@ -225,7 +298,9 @@ public class SharingPlanSelection {
 			}
 			Level = getNextLevel(G, Level, false);
 		}
-		System.out.println("Size: " + M);
+		long endExh = System.currentTimeMillis();
+		System.out.println("\nSize: " + M);
+		System.out.println("\nDuration Sharing Plan Selection: " + (endExh - startExh));
 		return opt;
 	}
 }

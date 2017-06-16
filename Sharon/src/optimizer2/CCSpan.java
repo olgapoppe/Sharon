@@ -29,6 +29,7 @@ public class CCSpan {
 	    			System.out.println("Frequent beneficial pattern " + p.toString() + " with BValue " + bvalue + " appears in " + p.patterns.size() + " patterns");
 	    			//number_of_beneficial_patterns++;
 	    		}
+	    		//else { System.out.println("Frequent non-beneficial pattern " + p.toString() + " with BValue " + bvalue); }
 	    		//number_of_patterns++;
 	    	 }
 	     }

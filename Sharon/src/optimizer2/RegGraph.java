@@ -59,5 +59,8 @@ public class RegGraph {
 		 for(String v : G.getVnames()) {
 			 System.out.println(v + " has degree " + G.getVertex(v).getDegree() + " and weight " + G.getVertex(v).getBValue());
 		 }
+		 
+		 double perc = 2.0 * G.numEdges() / (G.numVertices() * (G.numVertices() - 1.0));
+		 System.out.println("\nPercentage of Edges " + perc);
 	}
 }
