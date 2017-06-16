@@ -6,12 +6,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.Map;
 
 public class SharingPlanSelection {
 	// gwmin destroys the graph, so if you want to save the graph, make a copy of it.
-	public static Set<String> gwmin(Graph G) {
+	public static Map<String, String> gwmin(Graph G) {
 		long startGWMIN = System.currentTimeMillis();
-		Set<String> I = new HashSet<String>();
+		Map<String, String> I = new HashMap<String, String>();
 		double max;
 		double max_temp;
 		Pattern v_temp;
@@ -25,14 +26,14 @@ public class SharingPlanSelection {
 			V = G_i.getVnames();
 			for (String v_id : V) {
 				v_temp = G_i.getVertex(v_id);
-				max_temp = (double) v_temp.getBValue() / (v_temp.getDegree() + 1);
+				max_temp = (double) v_temp.getBValue() / (v_temp.getDegree() + 1.0);
 				if (max_temp > max) {
 					max = max_temp;
 					v_i = v_id;
 				}
 			}
 			//System.err.println(v_i + " BValue " + max);
-			I.add(v_i);
+			I.put(v_i, G.getVertex(v_i).patternsToString());
 			N = G.getNbrs(v_i);
 			for (String nbr_id : N) {
 				G.removeVertex(nbr_id);
@@ -42,7 +43,7 @@ public class SharingPlanSelection {
 		long endGWMIN = System.currentTimeMillis();
 		
 		int M = 0;
-		for (String s : I) { M += s.length()*2; }
+		for (String s : I.keySet()) { M += s.length()*2; M += I.get(s).length()*2; }
 		System.out.println("\nSize: " + M);
 		System.out.println("\nDuration Sharing Plan Selection: " + (endGWMIN - startGWMIN));
 		
@@ -150,11 +151,11 @@ public class SharingPlanSelection {
 			}
 		}
 		
-		return G_E;
+		return G_B;
 	}
 	
 	// sharon reduces the graph, so if you want to save the graph, make a copy of it.
-	public static Set<String> sharon(Graph G) {
+	public static Map<String, String> sharon(Graph G) {
 		Set<String> opt = new HashSet<String>(); // used to store optimal sub-plans
 		Set<String> S = new HashSet<String>(); // to return
 		Set<String> R, T;
@@ -255,16 +256,23 @@ public class SharingPlanSelection {
 			durSharon += endSharon - startSharon;
 		}
 		
-		for (String s : S) { M += s.length()*2; }
+		Map<String, String> S_map = new HashMap<String, String>();
+		
+		for (String s : S) { 
+			M += s.length()*2;
+			S_map.put(s, G.getVertex(s).patternsToString());
+		}
+		
 		System.out.println("\nSize: " + M);
 		System.out.println("\nDuration Expansion: " + durExpansion);
 		System.out.println("\nDuration Reduction: " + durReduction);
 		System.out.println("\nDuration Sharing Plan Selection: " + durSharon);
-		return S;
+		
+		return S_map;
 	}
 	
 	/***Exhaustive***/
-	public static Set<String> exhaustive(Graph G) {
+	public static Map<String, String> exhaustive(Graph G) {
 		long startExpansion = System.currentTimeMillis();
 		G = expand(G);
 		long endExpansion = System.currentTimeMillis();
@@ -301,6 +309,11 @@ public class SharingPlanSelection {
 		long endExh = System.currentTimeMillis();
 		System.out.println("\nSize: " + M);
 		System.out.println("\nDuration Sharing Plan Selection: " + (endExh - startExh));
-		return opt;
+		
+		Map<String, String> opt_map = new HashMap<String, String>();
+		for (String s : opt) {
+			opt_map.put(s, G.getVertex(s).patternsToString());
+		}
+		return opt_map;
 	}
 }

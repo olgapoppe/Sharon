@@ -4,8 +4,7 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 
 public class Main3 {
 	
@@ -99,7 +98,7 @@ public class Main3 {
 		 /*** Sharing Plan Selection ***/
 		
 		 //System.out.println("\n*** Shared patterns created by " + algo + " algorithm: ***");
-		 HashMap<String, String> sharedPatterns = new HashMap<String, String>();
+		 Map<String, String> sharedPatterns = new HashMap<String, String>();
 		 
 		 switch (algo) {
 		 case 0: sharedPatterns = SharingPlanSelection.exhaustive(G);
@@ -110,7 +109,7 @@ public class Main3 {
 		 break;
 		 }	
 		
-		 
+		 System.out.println("\nSharing Plan:");
 		 for (String s : sharedPatterns.keySet()) {
 				System.out.println(s + " in patterns " + sharedPatterns.get(s));
 			}

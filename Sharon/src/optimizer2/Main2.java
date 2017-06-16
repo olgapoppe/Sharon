@@ -67,6 +67,7 @@ public class Main2 {
 		 
 		 /*** Get shared patterns from frequent patterns ***/
 		
+		 /*
 		 System.out.println("\n*** Shared patterns created by " + algo + " algorithm: ***");
 		 Set<String> sharedPatterns = new HashSet<String>();
 		 long start =  System.currentTimeMillis();
@@ -85,6 +86,7 @@ public class Main2 {
 		 for (String s : sharedPatterns) {
 				System.out.println(s);
 			}
+			*/
 		  	 
 	}
 }
