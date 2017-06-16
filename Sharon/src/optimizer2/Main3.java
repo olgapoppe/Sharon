@@ -16,11 +16,13 @@ public class Main3 {
 		 int algo = 0; // algorithm: 0 - Exhaustive search, 1 - GWMIN, 2 - B&B
 		 String file_of_graph = "";
 		 String file_of_rates = "";
+		 String file_of_PQ = "";
 		 
 		 for (int i=0; i<args.length; i++) {			
 			if (args[i].equals("-algo")) 	algo = Integer.parseInt(args[++i]);
 			if (args[i].equals("-graph")) file_of_graph = args[++i];
 			if (args[i].equals("-rates")) 	file_of_rates = args[++i];
+			if (args[i].equals("-PQ")) 	file_of_PQ = args[++i];
 		 }	
 		 
 		 /*** Generate random rates for t event types ***/
@@ -78,10 +80,26 @@ public class Main3 {
 		 System.out.println("\nNumber of Vertices: " + G.numVertices());
 		 System.out.println("Number of Edges: " + G.numEdges());
 		 
-		 /*** Get shared patterns from frequent patterns ***/
+		 // queries
+		 try {
+			 String line;
+			 BufferedReader reader = new BufferedReader(new FileReader(file_of_PQ));
+			 
+			 while ((line = reader.readLine()) != null) {
+			        String[] parts = line.split(":");
+			        String[] ppatterns = parts[1].split(";");
+			        for (String pp : ppatterns) {
+			        	G.getVertex(parts[0]).add2Patterns(pp);
+			        }
+			    }
+			 reader.close();
+			 
+			 } catch (IOException e) { e.printStackTrace(); }
+		 
+		 /*** Sharing Plan Selection ***/
 		
 		 //System.out.println("\n*** Shared patterns created by " + algo + " algorithm: ***");
-		 Set<String> sharedPatterns = new HashSet<String>();
+		 HashMap<String, String> sharedPatterns = new HashMap<String, String>();
 		 
 		 switch (algo) {
 		 case 0: sharedPatterns = SharingPlanSelection.exhaustive(G);
@@ -93,8 +111,8 @@ public class Main3 {
 		 }	
 		
 		 
-		 for (String s : sharedPatterns) {
-				System.out.println(s + " in patterns " );
+		 for (String s : sharedPatterns.keySet()) {
+				System.out.println(s + " in patterns " + sharedPatterns.get(s));
 			}
 		  
 		 System.out.println("\nSharing plan contains " + sharedPatterns.size() + " patterns");

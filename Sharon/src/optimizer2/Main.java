@@ -73,7 +73,9 @@ public class Main {
 				BufferedWriter output = new BufferedWriter(new FileWriter(output_file));
 		 
 			for (Pattern freqP : frequentPatterns.values()) {
-				 output.append(freqP.toString() + ":" + freqP.patternsToString());
+				if (freqP.getBValue() > 0) {
+					output.append(freqP.toString() + ":" + freqP.patternsToString() + "\n");
+				}
 			 }
 			 output.close();
 		 } catch (IOException e) { e.printStackTrace(); }
