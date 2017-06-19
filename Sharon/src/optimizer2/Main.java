@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-// -n 20 -m 3 -k 40 -l 2 -t 100  -queries ../../experiments/queriesTEST.txt -rates ../../experiments/ratesTEST.txt -graph ../../experiments/graphTEST.txt
+// -n 20 -m 3 -k 50 -l 2 -t 100
 
 public class Main {
 	

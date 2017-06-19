@@ -1,6 +1,7 @@
 package optimizer2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -42,18 +43,17 @@ public class CCSpan {
 	 
 	 public static HashMap<String,Pattern> getSubpatterns (String pattern, HashMap<String,Pattern> results) {
 		 
-		for (int end=0; end<=pattern.length(); end++) {
+		 String[] parts = pattern.split(",");
+		 
+		for (int end=0; end <= parts.length; end++) {
 			 for (int start=0; start<=end; start++) {
-				 String subpattern = pattern.substring(start,end);
-				 if (subpattern.length() > 0 && subpattern.charAt(0)!=',' && subpattern.charAt(subpattern.length()-1)==',') {
-					 if (start==0 || pattern.charAt(start-1)==',') {
-						 Pattern p = (results.containsKey(subpattern)) ? results.get(subpattern) : new Pattern(subpattern);
-						 p.add2Patterns(pattern);
-						 if (subpattern.length() > 0) {
-							 results.put(subpattern, p);	}	
-					 }
-				 }				 
-		 }}
+				 String[] subparts = Arrays.copyOfRange(parts, start, end);
+				 String subpattern = Arrays.toString(subparts).replace("[", "").replace("]", "").replaceAll(" ", "") + ",";
+				 Pattern p = (results.containsKey(subpattern)) ? results.get(subpattern) : new Pattern(subpattern);
+				 p.add2Patterns(pattern);
+				 if (subpattern.split(",").length > 1) { results.put(subpattern, p);	}
+				 }
+		}
 		 return results;
 	 }
 

@@ -78,18 +78,19 @@ public class SharingPlanSelection {
 				if (non_nbrs.containsKey(G.getVertex(w).toString())) { 
 					if (non_nbrs.get(G.getVertex(w).toString()) < G.getVertex(w).getBValue()) {
 						non_nbrs.put(G.getVertex(w).toString(), G.getVertex(w).getBValue());
+						//System.err.println(v + " update maximal score " + G.getVertex(w).toString() + " with " + G.getVertex(w).getBValue());
 					}
 				}
 				else {
 					non_nbrs.put(G.getVertex(w).toString(), G.getVertex(w).getBValue());
+					//System.err.println(v + " update maximal score " + G.getVertex(w).toString() + " with " + G.getVertex(w).getBValue());
 				}
 			}
 		}
 		for (Integer NN : non_nbrs.values()) {
-			//System.err.println(v + " update maximal score " + NN);
 			p += NN;
 		}
-		System.err.println(v + " final maximal score " + p);
+		//System.err.println(v + " final maximal score " + p);
 		return p;
 	}
 	
@@ -336,11 +337,13 @@ public class SharingPlanSelection {
 		
 		System.out.println("\nDuration Expansion: " + (endExpansion - startExpansion));
 		
+		/*
 		System.out.println("\nEXPANDED GRAPH:\n" + G);
 		System.out.println("EXPANDED Vertices:");
 		for (String vtestexpansion : G.getVnames()) {
 			System.out.println(vtestexpansion + " in patterns " + G.getVertex(vtestexpansion).patternsToString());
 		}
+		*/
 		System.out.println("\nEXPANDED Number of Vertices: " + G.numVertices());
 		System.out.println("EXPANDED Number of Edges: " + G.numEdges());
 		
