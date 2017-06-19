@@ -86,7 +86,7 @@ public class Main {
 		 Graph G = new Graph(frequentPatterns);
 		 long endConstruction = System.currentTimeMillis();
 		 System.out.println("\nDuration Construction: " + (endConstruction - startConstruction));
-		 //System.out.println(G);
+		 //System.out.println("\n" + G);
 		 System.out.println("\nNumber of Vertices: " + G.numVertices());
 		 System.out.println("Number of Edges: " + G.numEdges());
 		 

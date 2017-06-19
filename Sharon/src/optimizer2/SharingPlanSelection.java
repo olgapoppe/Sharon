@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.Stack;
 import java.util.Map;
 
 public class SharingPlanSelection {
@@ -73,7 +74,7 @@ public class SharingPlanSelection {
 		HashMap<String, Integer> non_nbrs = new HashMap<String, Integer>();
 		int p = G.getVertex(v).getBValue();
 		for (String w : G.getVnames()) {
-			if (!G.hasEdge(v, w)) {
+			if (!G.hasEdge(v, w) && !v.equals(w)) {
 				if (non_nbrs.containsKey(G.getVertex(w).toString())) { 
 					if (non_nbrs.get(G.getVertex(w).toString()) < G.getVertex(w).getBValue()) {
 						non_nbrs.put(G.getVertex(w).toString(), G.getVertex(w).getBValue());
@@ -85,8 +86,10 @@ public class SharingPlanSelection {
 			}
 		}
 		for (Integer NN : non_nbrs.values()) {
+			//System.err.println(v + " update maximal score " + NN);
 			p += NN;
 		}
+		System.err.println(v + " final maximal score " + p);
 		return p;
 	}
 	
@@ -129,36 +132,81 @@ public class SharingPlanSelection {
 	}
 	
 	// Clique generation
-	public static HashSet<Pattern> getClique(Graph G, String v) {
+	public static HashSet<Pattern> getClique(Graph G, String v, HashMap<String,Integer> rates) {
 		HashSet<Pattern> C = new HashSet<Pattern>();
+		Stack<Pattern> L_c = new Stack<Pattern>();
+		Stack<Pattern> L_n = new Stack<Pattern>();
+		Set<String> Q_c; // queries that cause a conflict
+		HashSet<Set<String>> Qcombos = new HashSet<Set<String>>();
+		
+		L_c.push(G.getVertex(v));
+		C.add(G.getVertex(v));
+		
+		while (!L_c.isEmpty()){
+			Pattern vert = L_c.pop();
+			
+			for (String u : G.getNbrs(v)) {
+				if (vert.conflictsWith(G.getVertex(u))) {
+					Q_c = G.getVertex(v).getQueries();
+					Q_c.retainAll(G.getVertex(u).getQueries());
+					
+					int sizeNbrComb = 0; // Only remove a number of queries such that the neighbor can remove the others
+					while (G.getVertex(u).getQueries().size() - sizeNbrComb > 1 && sizeNbrComb < Q_c.size()) {
+						
+						Set<String> Q_prime = vert.getQueries();
+						Q_prime.removeAll(Q_c);
+						if (Q_prime.size()>1 && !Qcombos.contains(Q_prime)) {
+							Qcombos.add(Q_prime);
+							Pattern v_prime = new Pattern(v);
+							for (String p : Q_prime) {
+								v_prime.add2Patterns(p);
+							}
+							v_prime.getBValue(rates);
+							if (v_prime.getBValue()>0) {
+								L_n.push(v_prime);
+								C.add(v_prime);
+							}
+						}
+						
+						sizeNbrComb++;
+					}
+				}
+			}
+			
+			if (L_c.isEmpty()) {
+				L_c = L_n;
+				L_n = new Stack<Pattern>();
+			}
+		}
 		
 		return C;
 	}
 	
 	// Sharing conflict resolution
-	public static Graph expand(Graph G_B) {
+	public static Graph expand(Graph G_B, HashMap<String,Integer> rates) {
 		Graph G_E = new Graph();
 		HashSet<Pattern> C;
 		for (String v : G_B.getVnames()) {
-			C = getClique(G_B, v);
+			C = getClique(G_B, v, rates);
 			Set<String> c_names = G_E.addClique(C);
 			for (String v_prime : c_names) {
 				for (String u : G_E.getVnames()) {
-					if (G_E.getVertex(v_prime).conflictsWith(G_E.getVertex(u))) {
+					if (G_E.getVertex(v_prime).conflictsWith(G_E.getVertex(u)) && !G_E.getVertex(u).toString().equals(v)) {
+						//System.err.println("\nadded edge between " + v_prime + " and " + u);
 						G_E.addEdge(v_prime, u);
 					}
 				}
 			}
 		}
 		
-		return G_B;
+		return G_E;
 	}
 	
 	// sharon reduces the graph, so if you want to save the graph, make a copy of it.
-	public static Map<String, String> sharon(Graph G) {
-		Set<String> opt = new HashSet<String>(); // used to store optimal sub-plans
-		Set<String> S = new HashSet<String>(); // to return
-		Set<String> R, T;
+	public static Map<String, String> sharon(Graph G, HashMap<String,Integer> rates) {
+		Map<String, String> S_map = new HashMap<String, String>(); // to return
+		Set<String> R, T, opt;
+
 		int max;
 		double min = 0;
 		boolean reduce;
@@ -174,54 +222,63 @@ public class SharingPlanSelection {
 		for (Graph comp : CC) {
 			//System.err.println("Component number of vertices: " + comp.numVertices());
 			//System.err.println(S);
+			R = new HashSet<String>();
 			
 			// Graph Expansion
 			long startExpansion = System.currentTimeMillis();
 			
 			// Calculate min of basic graph before expansion begins
+			min = 0;
 			for (String v_id : comp.getVnames()) {
 				v_temp = comp.getVertex(v_id);
 				min += (double) v_temp.getBValue() / (v_temp.getDegree() + 1);
 			}
 			
-			comp = expand(comp);
+			comp = expand(comp, rates);
 			
 			long endExpansion = System.currentTimeMillis();
 			
 			durExpansion += (endExpansion - startExpansion);
 			
 			long startReduction = System.currentTimeMillis();
+			
+			System.out.println("\nEXPANDED COMPONENT:\n" + comp);
+			System.out.println("EXPANDED Vertices:");
+			for (String vtestexpansion : comp.getVnames()) {
+				System.out.println(vtestexpansion + " in patterns " + comp.getVertex(vtestexpansion).patternsToString());
+			}
+			System.out.println("\nEXPANDED Number of Vertices: " + comp.numVertices());
+			System.out.println("EXPANDED Number of Edges: " + comp.numEdges());
+			
 			// Graph reduction
 			reduce = true;
 			
 			while (reduce) {
-				R = new HashSet<String>(); // non-conflict
 				T = new HashSet<String>(); // non-beneficial
-				//System.err.println(min);
+				//System.err.println("min is " + min);
 				
 				for (String vname : comp.getVnames()) {
 					if (comp.getVertex(vname).getDegree()==0) {
-						R.add(vname);
+						if (!R.contains(vname)) { R.add(vname); }
 					} else if (pscore(comp,vname) < min) {
 						T.add(vname);
 					}
 				}
 				
-				for (String vname : R) {
-					comp.removeVertex(vname);
-					//System.err.println("reduction removed and saved " + vname);
-				}
-				
 				for (String vname : T) {
 					comp.removeVertex(vname);
-					//System.err.println("reduction removed " + vname);
+					System.err.println("reduction removed " + vname);
 				}
 				
-				if (R.size()==0 && T.size()==0) {
+				if (T.size()==0) {
 					reduce = false;
-				} else {
-					S.addAll(R);
 				}
+			}
+			
+			for (String vname : R) {
+				S_map.put(vname, comp.getVertex(vname).patternsToString());
+				comp.removeVertex(vname);
+				//System.err.println("reduction removed and saved " + vname);
 			}
 			
 			long endReduction = System.currentTimeMillis();
@@ -229,6 +286,7 @@ public class SharingPlanSelection {
 			
 			// Start Sharing Plan Selection
 			long startSharon = System.currentTimeMillis();
+			opt = new HashSet<String>(); // used to store optimal sub-plans
 			max = 0;
 			int tempM = 0;
 			
@@ -251,16 +309,15 @@ public class SharingPlanSelection {
 				}
 				Level = getNextLevel(comp, Level, true);
 			}
-			S.addAll(opt);
+			for (String optname : opt) {
+				S_map.put(optname, comp.getVertex(optname).patternsToString());
+			}
 			long endSharon = System.currentTimeMillis();
 			durSharon += endSharon - startSharon;
 		}
 		
-		Map<String, String> S_map = new HashMap<String, String>();
-		
-		for (String s : S) { 
-			M += s.length()*2;
-			S_map.put(s, G.getVertex(s).patternsToString());
+		for (String s : S_map.keySet()) { 
+			M += (s.length() + S_map.get(s).length())*2;
 		}
 		
 		System.out.println("\nSize: " + M);
@@ -272,12 +329,20 @@ public class SharingPlanSelection {
 	}
 	
 	/***Exhaustive***/
-	public static Map<String, String> exhaustive(Graph G) {
+	public static Map<String, String> exhaustive(Graph G, HashMap<String,Integer> rates) {
 		long startExpansion = System.currentTimeMillis();
-		G = expand(G);
+		G = expand(G, rates);
 		long endExpansion = System.currentTimeMillis();
 		
 		System.out.println("\nDuration Expansion: " + (endExpansion - startExpansion));
+		
+		System.out.println("\nEXPANDED GRAPH:\n" + G);
+		System.out.println("EXPANDED Vertices:");
+		for (String vtestexpansion : G.getVnames()) {
+			System.out.println(vtestexpansion + " in patterns " + G.getVertex(vtestexpansion).patternsToString());
+		}
+		System.out.println("\nEXPANDED Number of Vertices: " + G.numVertices());
+		System.out.println("EXPANDED Number of Edges: " + G.numEdges());
 		
 		long startExh = System.currentTimeMillis();
 		Set<String> opt = new HashSet<String>();

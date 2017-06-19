@@ -75,9 +75,9 @@ public class Main3 {
 		 
 		 } catch (IOException e) { e.printStackTrace(); }
 		 
-		 //System.out.println(G);
-		 System.out.println("\nNumber of Vertices: " + G.numVertices());
-		 System.out.println("Number of Edges: " + G.numEdges());
+		 System.out.println("BASIC GRAPH:\n" + G);
+		 System.out.println("BASIC Number of Vertices: " + G.numVertices());
+		 System.out.println("BASIC Number of Edges: " + G.numEdges());
 		 
 		 // queries
 		 try {
@@ -101,11 +101,11 @@ public class Main3 {
 		 Map<String, String> sharedPatterns = new HashMap<String, String>();
 		 
 		 switch (algo) {
-		 case 0: sharedPatterns = SharingPlanSelection.exhaustive(G);
+		 case 0: sharedPatterns = SharingPlanSelection.exhaustive(G, rates);
 		 break;
 		 case 1: sharedPatterns = SharingPlanSelection.gwmin(G);
 		 break;
-		 case 2: sharedPatterns = SharingPlanSelection.sharon(G);
+		 case 2: sharedPatterns = SharingPlanSelection.sharon(G, rates);
 		 break;
 		 }	
 		

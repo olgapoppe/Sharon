@@ -113,10 +113,14 @@ public class Graph {
 			String id = p.toString() + " ID " + count;
 			Pattern u = V.get(id);
 			if (u==null) {
-				Vnames.add(p.toString());
-				V.put(p.toString(), p);
+				Vnames.add(id);
+				V.put(id, p);
 				E.put(p, new HashSet<Pattern>());
 				nVerts++;
+				for (String name : names) {
+					//System.err.println("added edge between " + id + " and " + name);
+					this.addEdge(id, name);
+				}
 				names.add(id);
 				count++;
 			}
