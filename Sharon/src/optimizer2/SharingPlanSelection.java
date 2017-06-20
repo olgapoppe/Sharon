@@ -139,9 +139,14 @@ public class SharingPlanSelection {
 		Stack<Pattern> L_n = new Stack<Pattern>();
 		Set<String> Q_c; // queries that cause a conflict
 		HashSet<Set<String>> Qcombos = new HashSet<Set<String>>();
+		ArrayList<Set<String>> Qlevel = new ArrayList<Set<String>>();
+		Set<String> Q_prime;
+		ArrayList<String> tempQ;
+		ArrayList<Set<String>> nextQlevel = new ArrayList<Set<String>>();
 		
 		L_c.push(G.getVertex(v));
 		C.add(G.getVertex(v));
+		Qcombos.add(G.getVertex(v).getQueries());
 		
 		while (!L_c.isEmpty()){
 			Pattern vert = L_c.pop();
@@ -149,27 +154,54 @@ public class SharingPlanSelection {
 			for (String u : G.getNbrs(v)) {
 				if (vert.conflictsWith(G.getVertex(u))) {
 					Q_c = G.getVertex(v).getQueries();
-					Q_c.retainAll(G.getVertex(u).getQueries());
+					Q_c.retainAll(G.getVertex(u).getQueries()); // the queries causing the conflict
 					
-					int sizeNbrComb = 0; // Only remove a number of queries such that the neighbor can remove the others
+					Q_prime = vert.getQueries();
+					Q_prime.removeAll(Q_c);
+					if (Q_prime.size()>1 && !Qcombos.contains(Q_prime)) {
+						Qcombos.add(Q_prime);
+						Pattern v_prime = new Pattern(v);
+						for (String p : Q_prime) {
+							v_prime.add2Patterns(p);
+						}
+						v_prime.getBValue(rates);
+						if (v_prime.getBValue()>0) {
+							L_n.push(v_prime);
+							C.add(v_prime);
+						}
+					}
+					Qlevel.add(Q_prime);
+					
+					int sizeNbrComb = 1; // Only remove a number of queries such that the neighbor can remove the others
 					while (G.getVertex(u).getQueries().size() - sizeNbrComb > 1 && sizeNbrComb < Q_c.size()) {
-						
-						Set<String> Q_prime = vert.getQueries();
-						Q_prime.removeAll(Q_c);
-						if (Q_prime.size()>1 && !Qcombos.contains(Q_prime)) {
-							Qcombos.add(Q_prime);
-							Pattern v_prime = new Pattern(v);
-							for (String p : Q_prime) {
-								v_prime.add2Patterns(p);
-							}
-							v_prime.getBValue(rates);
-							if (v_prime.getBValue()>0) {
-								L_n.push(v_prime);
-								C.add(v_prime);
+						for (int i=0; i<Qlevel.size(); i++) {
+							tempQ = new ArrayList<String>(vert.getQueries());
+							for (int j=0; j<tempQ.size(); j++) {
+								Q_prime = new HashSet<String>(Qlevel.get(i));
+								Q_prime.add(tempQ.get(j));
+								
+								if (!Qcombos.contains(Q_prime)) {
+									nextQlevel.add(Q_prime);
+									Qcombos.add(Q_prime);
+									
+									if (Q_prime.size()>1) {
+										
+										Pattern v_prime = new Pattern(v);
+										for (String p : Q_prime) {
+											v_prime.add2Patterns(p);
+										}
+										v_prime.getBValue(rates);
+										if (v_prime.getBValue()>0) {
+											L_n.push(v_prime);
+											C.add(v_prime);
+										}
+									}
+								}
 							}
 						}
-						
 						sizeNbrComb++;
+						Qlevel = nextQlevel;
+						nextQlevel = new ArrayList<Set<String>>();
 					}
 				}
 			}
@@ -179,7 +211,6 @@ public class SharingPlanSelection {
 				L_n = new Stack<Pattern>();
 			}
 		}
-		
 		return C;
 	}
 	
@@ -243,14 +274,16 @@ public class SharingPlanSelection {
 			
 			long startReduction = System.currentTimeMillis();
 			
+			/*
 			System.out.println("\nEXPANDED COMPONENT:\n" + comp);
 			System.out.println("EXPANDED Vertices:");
 			for (String vtestexpansion : comp.getVnames()) {
-				System.out.println(vtestexpansion + " in patterns " + comp.getVertex(vtestexpansion).patternsToString());
+				System.out.println(vtestexpansion + " in patterns " + comp.getVertex(vtestexpansion).patternsToString() + " BValue " + comp.getVertex(vtestexpansion).getBValue());
 			}
-			System.out.println("\nEXPANDED Number of Vertices: " + comp.numVertices());
-			System.out.println("EXPANDED Number of Edges: " + comp.numEdges());
 			
+			System.out.println("\nEXPANDED COMPONENT Number of Vertices: " + comp.numVertices());
+			System.out.println("EXPANDED COMPONENT Number of Edges: " + comp.numEdges());
+			*/
 			// Graph reduction
 			reduce = true;
 			

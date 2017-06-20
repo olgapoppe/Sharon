@@ -75,7 +75,7 @@ public class Main3 {
 		 
 		 } catch (IOException e) { e.printStackTrace(); }
 		 
-		 System.out.println("BASIC GRAPH:\n" + G);
+		 //System.out.println("BASIC GRAPH:\n" + G);
 		 System.out.println("BASIC Number of Vertices: " + G.numVertices());
 		 System.out.println("BASIC Number of Edges: " + G.numEdges());
 		 
@@ -109,11 +109,13 @@ public class Main3 {
 		 break;
 		 }	
 		
+		 /*
 		 System.out.println("\nSharing Plan:");
 		 for (String s : sharedPatterns.keySet()) {
 				System.out.println(s + " in patterns " + sharedPatterns.get(s));
 			}
 		  
 		 System.out.println("\nSharing plan contains " + sharedPatterns.size() + " patterns");
+		 */
 	}
 }
