@@ -14,6 +14,7 @@ public class SharingPlanSelection {
 	public static Map<String, String> gwmin(Graph G) {
 		long startGWMIN = System.currentTimeMillis();
 		Map<String, String> I = new HashMap<String, String>();
+		Map<String, Pattern> I_p = new HashMap<String, Pattern>();
 		double max;
 		double max_temp;
 		Pattern v_temp;
@@ -21,6 +22,7 @@ public class SharingPlanSelection {
 		Graph G_i = G;
 		Set<String> V;
 		Set<String> N;
+		int M = 0;
 		while (G_i.numVertices() != 0) {
 			max = 0;
 			v_i = "";
@@ -34,7 +36,8 @@ public class SharingPlanSelection {
 				}
 			}
 			//System.err.println(v_i + " BValue " + max);
-			I.put(v_i, G.getVertex(v_i).patternsToString());
+			I_p.put(v_i, G.getVertex(v_i));
+			M += v_i.length()*2 + 4;
 			N = G.getNbrs(v_i);
 			for (String nbr_id : N) {
 				G.removeVertex(nbr_id);
@@ -43,8 +46,9 @@ public class SharingPlanSelection {
 		}
 		long endGWMIN = System.currentTimeMillis();
 		
-		int M = 0;
-		for (String s : I.keySet()) { M += s.length()*2; M += I.get(s).length()*2; }
+		for (String s : I_p.keySet()) {
+			I.put(s, I_p.get(s).patternsToString());
+		}
 		System.out.println("\nSize Sharing Plan Selection: " + M);
 		System.out.println("\nDuration Sharing Plan Selection: " + (endGWMIN - startGWMIN));
 		
