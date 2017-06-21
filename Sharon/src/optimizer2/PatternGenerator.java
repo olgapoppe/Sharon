@@ -29,7 +29,7 @@ public class PatternGenerator {
 			 	}
 			 	Pattern pattern = new Pattern(long_pattern);
 			 	long_patterns.add(pattern);
-			 	System.out.println(pattern.toString());
+			 	//System.out.println(pattern.toString());
 			 	
 			 	output.append(long_pattern + "\n");
 			}

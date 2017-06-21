@@ -13,6 +13,7 @@ public class Graph {
 	private HashMap<Pattern, HashSet<Pattern>> E;
 	private int nVerts;
 	private int nEdges;
+	public int M;
 	
 	public Graph() {
 		Vnames = new LinkedHashSet<String>();
@@ -20,9 +21,11 @@ public class Graph {
 		E = new HashMap<Pattern, HashSet<Pattern>>();
 		nVerts = 0;
 		nEdges = 0;
+		M = 0;
 	}
 	
 	public Graph(HashMap<String,Pattern> F) {
+		M = 0;
 		Vnames = new LinkedHashSet<String>();
 		V = new HashMap<String, Pattern>();
 		E = new HashMap<Pattern, HashSet<Pattern>>();
@@ -32,14 +35,17 @@ public class Graph {
 		for (Pattern p : F.values()) {
 			if (p.getBValue()>0) {
 				this.addVertex(p);
+				M += (p.toString().length()*3 + p.patternsToString().length())*2 + 8;
 				for (Pattern p_prime : added) {
 					if(p.conflictsWith(p_prime)) {
 						this.addEdge(p.toString(), p_prime.toString());
+						M += 8;
 					}
 				}
 				added.add(p);
 			}
 		}
+		M += 8; // for nVerts and nEdges
 	}
 	
 	public Graph(HashMap<String,Pattern> F, Graph G) {
@@ -48,6 +54,7 @@ public class Graph {
 		E = new HashMap<Pattern, HashSet<Pattern>>();
 		nVerts = 0;
 		nEdges = 0;
+		M = 0;
 		Set<Pattern> added = new HashSet<Pattern>();
 		for (Pattern p : F.values()) {
 			if (p.getBValue()>0) {
@@ -109,6 +116,7 @@ public class Graph {
 	public Set<String> addClique(Set<Pattern> C) {
 		Set<String> names = new HashSet<String>();
 		int count = 1;
+		M += 4;
 		for (Pattern p : C) {
 			String id = p.toString() + " ID " + count;
 			Pattern u = V.get(id);
@@ -117,9 +125,11 @@ public class Graph {
 				V.put(id, p);
 				E.put(p, new HashSet<Pattern>());
 				nVerts++;
+				M += (id.length()*3 + p.toString().length() + p.patternsToString().length())*2 + 8;
 				for (String name : names) {
 					//System.err.println("added edge between " + id + " and " + name);
 					this.addEdge(id, name);
+					M += 8;
 				}
 				names.add(id);
 				count++;
@@ -201,6 +211,10 @@ public class Graph {
 	
 	public Pattern getVertex(String lab) {
 		return V.get(lab);
+	}
+	
+	public int getSize() {
+		return M;
 	}
 	
 	public ArrayList<Graph> connectedComp() {

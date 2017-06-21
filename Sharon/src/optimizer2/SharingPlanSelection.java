@@ -45,7 +45,7 @@ public class SharingPlanSelection {
 		
 		int M = 0;
 		for (String s : I.keySet()) { M += s.length()*2; M += I.get(s).length()*2; }
-		System.out.println("\nSize: " + M);
+		System.out.println("\nSize Sharing Plan Selection: " + M);
 		System.out.println("\nDuration Sharing Plan Selection: " + (endGWMIN - startGWMIN));
 		
 		return I;
@@ -226,11 +226,11 @@ public class SharingPlanSelection {
 					if (G_E.getVertex(v_prime).conflictsWith(G_E.getVertex(u)) && !G_E.getVertex(u).toString().equals(v)) {
 						//System.err.println("\nadded edge between " + v_prime + " and " + u);
 						G_E.addEdge(v_prime, u);
+						G_E.M += 8;
 					}
 				}
 			}
 		}
-		
 		return G_E;
 	}
 	
@@ -244,12 +244,13 @@ public class SharingPlanSelection {
 		boolean reduce;
 		Pattern v_temp;
 		LinkedList<LinkedList<String>> Level = new LinkedList<LinkedList<String>>();
-		int M = 0;
+		int M = 4;
 		
 		ArrayList<Graph> CC = G.connectedComp();
 		long durExpansion = 0;
 		long durReduction = 0;
 		long durSharon = 0;
+		int MReduction = 8;
 		
 		for (Graph comp : CC) {
 			//System.err.println("Component number of vertices: " + comp.numVertices());
@@ -272,23 +273,28 @@ public class SharingPlanSelection {
 			
 			durExpansion += (endExpansion - startExpansion);
 			
-			long startReduction = System.currentTimeMillis();
-			
 			/*
 			System.out.println("\nEXPANDED COMPONENT:\n" + comp);
 			System.out.println("EXPANDED Vertices:");
 			for (String vtestexpansion : comp.getVnames()) {
 				System.out.println(vtestexpansion + " in patterns " + comp.getVertex(vtestexpansion).patternsToString() + " BValue " + comp.getVertex(vtestexpansion).getBValue());
 			}
-			
-			System.out.println("\nEXPANDED COMPONENT Number of Vertices: " + comp.numVertices());
-			System.out.println("EXPANDED COMPONENT Number of Edges: " + comp.numEdges());
 			*/
+			if (comp.numVertices()>20) {
+				System.out.println("\nEXPANDED COMPONENT Number of Vertices: " + comp.numVertices());
+				System.out.println("EXPANDED COMPONENT Number of Edges: " + comp.numEdges());
+			}
+			
+			long startReduction = System.currentTimeMillis();
+			
 			// Graph reduction
 			reduce = true;
+			int tempMRed;
+			int maxtempMRed = 0;
 			
 			while (reduce) {
 				T = new HashSet<String>(); // non-beneficial
+				tempMRed = 0;
 				//System.err.println("min is " + min);
 				
 				for (String vname : comp.getVnames()) {
@@ -296,21 +302,26 @@ public class SharingPlanSelection {
 						if (!R.contains(vname)) { R.add(vname); }
 					} else if (pscore(comp,vname) < min) {
 						T.add(vname);
+						tempMRed += vname.length()*2;
 					}
 				}
 				
 				for (String vname : T) {
 					comp.removeVertex(vname);
-					System.err.println("reduction removed " + vname);
+					//System.err.println("reduction removed " + vname);
 				}
 				
 				if (T.size()==0) {
 					reduce = false;
+				} else {
+					if (maxtempMRed < tempMRed) { maxtempMRed = tempMRed; }
 				}
 			}
+			MReduction += maxtempMRed;
 			
 			for (String vname : R) {
 				S_map.put(vname, comp.getVertex(vname).patternsToString());
+				MReduction += vname.length()*2;
 				comp.removeVertex(vname);
 				//System.err.println("reduction removed and saved " + vname);
 			}
@@ -354,9 +365,10 @@ public class SharingPlanSelection {
 			M += (s.length() + S_map.get(s).length())*2;
 		}
 		
-		System.out.println("\nSize: " + M);
 		System.out.println("\nDuration Expansion: " + durExpansion);
+		System.out.println("\nSize Reduction: " + MReduction);
 		System.out.println("\nDuration Reduction: " + durReduction);
+		System.out.println("\nSize Sharing Plan Selection: " + M);
 		System.out.println("\nDuration Sharing Plan Selection: " + durSharon);
 		
 		return S_map;
@@ -368,6 +380,7 @@ public class SharingPlanSelection {
 		G = expand(G, rates);
 		long endExpansion = System.currentTimeMillis();
 		
+		System.out.println("\nSize Expansion: " + G.getSize());
 		System.out.println("\nDuration Expansion: " + (endExpansion - startExpansion));
 		
 		/*
@@ -382,34 +395,36 @@ public class SharingPlanSelection {
 		
 		long startExh = System.currentTimeMillis();
 		Set<String> opt = new HashSet<String>();
-		int max = 0;
-		LinkedList<LinkedList<String>> Level = new LinkedList<LinkedList<String>>();
-		
-		int M = 0;
-		int tempM = 0;
-		
-		for (String vname : G.getVnames()) {
-			Level.add(new LinkedList<String>(Arrays.asList(vname)));
-		}
-		
-		for (int i = 1; i <= G.numVertices(); i++) {
-			tempM = 0;
-			for (LinkedList<String> P : Level) {
-				if (isValid(G, P) && score(G, P) > max) {
-					opt.clear();
-					opt.addAll(P);
-					max = score(G, P);
-				}
-				
-				for (String s : P) { tempM += s.length()*2; }
-				if (tempM > M) { M = tempM; }
-				
+		if (G.numVertices()<18) {
+			int max = 0;
+			LinkedList<LinkedList<String>> Level = new LinkedList<LinkedList<String>>();
+			
+			int M = 0;
+			int tempM = 0;
+			
+			for (String vname : G.getVnames()) {
+				Level.add(new LinkedList<String>(Arrays.asList(vname)));
 			}
-			Level = getNextLevel(G, Level, false);
+			
+			for (int i = 1; i <= G.numVertices(); i++) {
+				tempM = 0;
+				for (LinkedList<String> P : Level) {
+					if (isValid(G, P) && score(G, P) > max) {
+						opt.clear();
+						opt.addAll(P);
+						max = score(G, P);
+					}
+					
+					for (String s : P) { tempM += s.length()*2; }
+					if (tempM > M) { M = tempM; }
+					
+				}
+				Level = getNextLevel(G, Level, false);
+			}
+			long endExh = System.currentTimeMillis();
+			System.out.println("\nSize Sharing Plan Selection: " + M);
+			System.out.println("\nDuration Sharing Plan Selection: " + (endExh - startExh));
 		}
-		long endExh = System.currentTimeMillis();
-		System.out.println("\nSize: " + M);
-		System.out.println("\nDuration Sharing Plan Selection: " + (endExh - startExh));
 		
 		Map<String, String> opt_map = new HashMap<String, String>();
 		for (String s : opt) {
