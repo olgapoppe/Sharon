@@ -1,9 +1,11 @@
-package optimizer;
+package optimizer2;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import java.util.ArrayList;
 
 public class Graph {
 	private LinkedHashSet<String> Vnames;
@@ -11,6 +13,7 @@ public class Graph {
 	private HashMap<Pattern, HashSet<Pattern>> E;
 	private int nVerts;
 	private int nEdges;
+	public int M;
 	
 	public Graph() {
 		Vnames = new LinkedHashSet<String>();
@@ -18,9 +21,11 @@ public class Graph {
 		E = new HashMap<Pattern, HashSet<Pattern>>();
 		nVerts = 0;
 		nEdges = 0;
+		M = 0;
 	}
 	
 	public Graph(HashMap<String,Pattern> F) {
+		M = 0;
 		Vnames = new LinkedHashSet<String>();
 		V = new HashMap<String, Pattern>();
 		E = new HashMap<Pattern, HashSet<Pattern>>();
@@ -30,8 +35,32 @@ public class Graph {
 		for (Pattern p : F.values()) {
 			if (p.getBValue()>0) {
 				this.addVertex(p);
+				M += (p.toString().length()*3 + p.patternsToString().length())*2 + 8;
 				for (Pattern p_prime : added) {
 					if(p.conflictsWith(p_prime)) {
+						this.addEdge(p.toString(), p_prime.toString());
+						M += 8;
+					}
+				}
+				added.add(p);
+			}
+		}
+		M += 8; // for nVerts and nEdges
+	}
+	
+	public Graph(HashMap<String,Pattern> F, Graph G) {
+		Vnames = new LinkedHashSet<String>();
+		V = new HashMap<String, Pattern>();
+		E = new HashMap<Pattern, HashSet<Pattern>>();
+		nVerts = 0;
+		nEdges = 0;
+		M = 0;
+		Set<Pattern> added = new HashSet<Pattern>();
+		for (Pattern p : F.values()) {
+			if (p.getBValue()>0) {
+				this.addVertex(p);
+				for (Pattern p_prime : added) {
+					if(G.hasEdge(p.toString(), p_prime.toString())) {
 						this.addEdge(p.toString(), p_prime.toString());
 					}
 				}
@@ -46,6 +75,17 @@ public class Graph {
 			Vnames.add(p.toString());
 			V.put(p.toString(), p);
 			E.put(p, new HashSet<Pattern>());
+			nVerts++;
+		}
+	}
+	
+	public void addVertex(String lab, int w) {
+		Pattern u = V.get(lab);
+		if (u==null) {
+			Vnames.add(lab);
+			u = new Pattern(lab, w);
+			V.put(lab, u);
+			E.put(u, new HashSet<Pattern>());
 			nVerts++;
 		}
 	}
@@ -71,6 +111,33 @@ public class Graph {
 		nVerts--;
 	}
 	
+	// generates id names for each vertex in clique
+	// draws an edge between each vertex in clique
+	public Set<String> addClique(Set<Pattern> C) {
+		Set<String> names = new HashSet<String>();
+		int count = 1;
+		M += 4;
+		for (Pattern p : C) {
+			String id = p.toString() + " ID " + count;
+			Pattern u = V.get(id);
+			if (u==null) {
+				Vnames.add(id);
+				V.put(id, p);
+				E.put(p, new HashSet<Pattern>());
+				nVerts++;
+				M += (id.length()*3 + p.toString().length() + p.patternsToString().length())*2 + 8;
+				for (String name : names) {
+					//System.err.println("added edge between " + id + " and " + name);
+					this.addEdge(id, name);
+					M += 8;
+				}
+				names.add(id);
+				count++;
+			}
+		}
+		return names;
+	}
+	
 	public boolean hasVertex(String lab) {
 		return V.containsKey(lab);
 	}
@@ -83,7 +150,7 @@ public class Graph {
 		Pattern u = V.get(fr);
 		Pattern v = V.get(to);
 		if (u==null || v==null) {
-			System.err.println("Edge addition failed");
+			System.err.println("Edge addition failed between " + fr + " and " + to);
 			return;			// the vertices don't exist
 		}
 		if (E.get(u).add(v)) {
@@ -146,13 +213,89 @@ public class Graph {
 		return V.get(lab);
 	}
 	
+	public int getSize() {
+		return M;
+	}
+	
+	public ArrayList<Graph> connectedComp() {
+		ArrayList<Graph> components = new ArrayList<Graph>();
+		ArrayList<HashMap<String, Pattern>> compPatterns = new ArrayList<HashMap<String, Pattern>>();
+		int numComponents = 0;
+		HashMap<String, Integer> nodeCompIDs = new HashMap<String, Integer>();
+		Set<String> keys = V.keySet();
+		
+		for (String k : keys) {
+			ArrayList<Integer> graphNums = new ArrayList<Integer>();
+			// Identify which subgraphs should be combined
+			for (String oldK : nodeCompIDs.keySet()) {
+				if (this.hasEdge(k, oldK)) {
+					graphNums.add(nodeCompIDs.get(oldK));
+				}
+			}
+			// Combine subgraphs
+			if (graphNums.size() > 0) { 
+				nodeCompIDs.put(k, graphNums.get(0));
+			
+				for (int i=1; i<graphNums.size(); i++) {
+					for (String node : nodeCompIDs.keySet()) {
+						if (nodeCompIDs.get(node) == graphNums.get(i)) { nodeCompIDs.put(node, graphNums.get(0)); }
+					}
+				}
+			
+			} else {
+				nodeCompIDs.put(k, numComponents);
+				numComponents++;
+			}
+			
+			this.getVertex(k).setDegree(0);
+		}
+		
+		// Create hashmaps of patterns
+		for (int j=0; j<numComponents; j++) {
+			HashMap<String, Pattern> H = new HashMap<String, Pattern>();
+			for (String k : nodeCompIDs.keySet()) {
+				if (nodeCompIDs.get(k)==j) {
+					H.put(k, this.getVertex(k));
+				}
+			}
+			compPatterns.add(H);
+		}
+		
+		for (int i=0; i<compPatterns.size(); i++) {
+			components.add(new Graph(compPatterns.get(i), this));
+		}
+		
+		return components;
+	}
+	
+	public String toString2() {
+		HashMap<String, String> names4print = new HashMap<String, String>();
+		int name = 0;
+		for (String v : Vnames) {
+			names4print.put(v, name+"");
+			name++;
+		}
+		
+		String s = "";
+		for (Pattern u : V.values()) {
+			s += names4print.get(u.toString()) + ":";
+			for (Pattern v : E.get(u)) {
+				s += names4print.get(v.toString()) + " ";
+			}
+			s += ":" + u.getBValue();
+			s += "\n";
+		}
+		return s;
+	}
+	
 	public String toString() {
 		String s = "";
 		for (Pattern u : V.values()) {
-			s += u + ": ";
+			s += u.toString() + ":";
 			for (Pattern v : E.get(u)) {
-				s += v + " ";
+				s += v.toString() + " ";
 			}
+			s += ":" + u.getBValue();
 			s += "\n";
 		}
 		return s;

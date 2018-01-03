@@ -1,4 +1,4 @@
-package optimizer;
+package optimizer2;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,7 +29,7 @@ public class PatternGenerator {
 			 	}
 			 	Pattern pattern = new Pattern(long_pattern);
 			 	long_patterns.add(pattern);
-			 	System.out.println(pattern.toString());
+			 	//System.out.println(pattern.toString());
 			 	
 			 	output.append(long_pattern + "\n");
 			}
@@ -46,7 +46,8 @@ public class PatternGenerator {
 		 for (int i=0; i<k; i++) {
 			 String p = "";
 			 for (int j=0; j<l; j++) {
-				int event_type = random.nextInt(t);
+				int event_type=-1;
+				while (event_type<0 || p.contains(event_type + ",")) { event_type = random.nextInt(t); }
 				p += event_type + ",";
 			 }
 			 Pattern pattern = new Pattern(p);

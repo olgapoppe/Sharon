@@ -1,4 +1,4 @@
-package optimizer;
+package optimizer2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,6 +20,13 @@ public class Pattern {
 		degree = 0;
 	}
 	
+	Pattern(String p, int b) {
+		pattern = p;
+		patterns = new ArrayList<String>();
+		BValue = b;
+		degree = 0;
+	}
+	
 	public boolean isFrequent() {
 		return patterns.size() > 1;
 	}
@@ -30,22 +37,21 @@ public class Pattern {
 	}	
 	
 	public int getBValue(HashMap<String,Integer> rates) {
+		ArrayList<String> profiting = new ArrayList<String>();
 		
 		int cost_pattern = 0;
-		String temp = "";
+		String[] pattern_parts = pattern.split(",");
 		
-		for (int i=0; i<pattern.length(); i++) { 
-			if (pattern.charAt(i) != ',') {
-				temp += pattern.charAt(i);
-			} else {
-			cost_pattern = rates.get(temp); 
-			temp = "";
-			}
+		for (String part : pattern_parts) { 
+			if (part.length()>0) { cost_pattern += rates.get(part); }
 		}
+		
 		int ns_cost = 0;
 		int s_cost = rates.get(pattern.charAt(0)+"") * cost_pattern;
 	
 		for (String super_pattern : patterns) {
+			int recomp = 0; // non-shared cost for one query
+			int comb = 0; // shared cost for one query
 			
 			/*** Determine prefix and suffix ***/
 			String prefix = "";
@@ -61,39 +67,32 @@ public class Pattern {
 			/*** Non-shared method ***/
 			int cost_prefix = 0;
 			int cost_suffix =0;
-			if (prefix.length() > 0) {
-				if (prefix.charAt(0) == ',') { prefix = prefix.substring(1); }
-				if (prefix.charAt(prefix.length()-1) != ',') { prefix += ','; }
-			}
-			if (suffix.length() > 0) {
-				if (suffix.charAt(0) == ',') { suffix = suffix.substring(1); }
-				if (suffix.charAt(suffix.length()-1) != ',') { suffix += ','; }
-			}
 			
-			for (int i=0; i<prefix.length(); i++) { 
-				if (prefix.charAt(i) != ',') {
-					temp += prefix.charAt(i);
-				} else {
-					cost_prefix = rates.get(temp);
-					temp = "";
-				}
+			String[] prefix_parts = prefix.split(",");
+			String[] suffix_parts = suffix.split(",");
+			
+			for (String part : prefix_parts) { 
+				if (part.length()>0) { cost_prefix += rates.get(part); }
 			}
-			for (int i=0; i<suffix.length(); i++) { 
-				if (suffix.charAt(i) != ',') {
-					temp += suffix.charAt(i);
-				} else {
-					cost_suffix = rates.get(temp);
-					temp = "";
-				}	
+			for (String part : suffix_parts) { 
+				if (part.length()>0) { cost_suffix += rates.get(part); }
 			}
-			ns_cost += rates.get(super_pattern.charAt(0)+"") * (cost_prefix + cost_pattern + cost_suffix);	
+			recomp = rates.get(super_pattern.charAt(0)+"") * (cost_prefix + cost_pattern + cost_suffix);	
 			
 			/*** Shared method ***/
-			if (prefix.length()>0) s_cost += rates.get(prefix.charAt(0)+"") * cost_prefix;
-			if (suffix.length()>0) s_cost += rates.get(suffix.charAt(0)+"") * cost_suffix;
-			if (prefix.length()>0 && suffix.length()>0) s_cost += rates.get(prefix.charAt(0)+"") * rates.get(pattern.charAt(0)+"") * rates.get(suffix.charAt(0)+"");			
+			if (prefix.length()>0) comb += rates.get(prefix.charAt(0)+"") * cost_prefix;
+			if (suffix.length()>0) comb += rates.get(suffix.charAt(0)+"") * cost_suffix;
+			if (prefix.length()>0 && suffix.length()>0) comb += rates.get(prefix.charAt(0)+"") * rates.get(pattern.charAt(0)+"") * rates.get(suffix.charAt(0)+"");			
+		
+			if (recomp > comb) {
+				ns_cost += recomp;
+				s_cost += comb;
+				profiting.add(super_pattern);
+			}
 		}
-		BValue = ns_cost - s_cost;				
+		BValue = ns_cost - s_cost;	
+		patterns = profiting;
+		if (patterns.size()<2) { BValue = -1; }
 		return BValue;
 	}
 	
@@ -107,6 +106,10 @@ public class Pattern {
 	
 	public int getDegree() {
 		return degree;
+	}
+	
+	public void setDegree(int num) {
+		degree = num;
 	}
 	
 	public boolean conflictsWith(Pattern p) {
